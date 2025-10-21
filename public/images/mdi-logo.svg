@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" style="background: transparent;">
+  <defs>
+    <style>
+      .logo-text { 
+        fill: #4F5F9F; 
+        font-family: Arial, sans-serif; 
+        font-weight: bold; 
+        font-size: 36px;
+      }
+    </style>
+  </defs>
+  
+  <!-- Letra 'm' -->
+  <path d="M10 20 L10 60 L20 60 L20 35 C20 30 25 25 30 25 C35 25 40 30 40 35 L40 60 L50 60 L50 35 C50 30 55 25 60 25 C65 25 70 30 70 35 L70 60 L80 60 L80 35 C80 20 65 15 55 15 C50 15 45 17 42 20 C39 17 34 15 29 15 C19 15 10 20 10 35 Z" fill="#4F5F9F"/>
+  
+  <!-- Letra 'd' -->
+  <path d="M90 15 L90 25 C95 20 102 15 110 15 C125 15 135 25 135 40 C135 55 125 65 110 65 C102 65 95 60 90 55 L90 60 L80 60 L80 15 Z M90 40 C90 50 95 55 105 55 C115 55 125 50 125 40 C125 30 115 25 105 25 C95 25 90 30 90 40 Z" fill="#4F5F9F"/>
+  
+  <!-- Letra 'i' -->
+  <path d="M145 15 L155 15 L155 60 L145 60 Z M145 5 L155 5 L155 12 L145 12 Z" fill="#4F5F9F"/>
+  
+  <!-- Punto decorativo -->
+  <circle cx="175" cy="25" r="8" fill="#6B7BB8"/>
+</svg>
