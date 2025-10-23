@@ -60,7 +60,7 @@
                 <div class="flex flex-col items-center justify-center text-center mb-6">
                     <!-- Logo Principal Centrado -->
                     <div class="mb-4">
-                        <img src="{{ asset('images/mdi-logo.svg') }}" alt="MDI Logo" class="h-16 md:h-20 lg:h-24 w-auto mx-auto">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 md:h-20 lg:h-24 w-auto mx-auto">
                     </div>
                     <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-2">
                         CMS Digital
@@ -379,7 +379,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center mb-4">
-                        <img src="{{ asset('images/mdi-logo.svg') }}" alt="MDI Logo" class="h-8 w-auto mr-3">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mr-3">
                         <h3 class="text-xl font-bold">CMS Digital</h3>
                     </div>
                     <p class="text-gray-300 text-sm mb-4">
