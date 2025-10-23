@@ -24,9 +24,11 @@
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         <div class="flex flex-col w-64 bg-gray-900">
-            <div class="flex flex-col items-center justify-center h-20 px-4 bg-gray-800">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mb-2">
-                <h1 class="text-lg font-bold text-white">CMS Digital</h1>
+            <div class="flex items-center justify-center h-16 px-4 bg-gray-800">
+                <div class="flex items-center space-x-2">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-6 w-auto">
+                    <h1 class="text-base font-bold text-white">CMS Digital</h1>
+                </div>
             </div>
             
             <nav class="flex-1 px-2 py-4 space-y-2">
