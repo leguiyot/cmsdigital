@@ -29,6 +29,7 @@ class Article extends Model implements HasMedia
         'meta_description',
         'meta_keywords',
         'is_featured',
+        'featured_at',
         'allow_comments',
         'views_count',
         'reading_time',
@@ -38,6 +39,7 @@ class Article extends Model implements HasMedia
     {
         return [
             'published_at' => 'datetime',
+            'featured_at' => 'datetime',
             'tags' => 'array',
             'meta_keywords' => 'array',
             'is_featured' => 'boolean',
@@ -117,6 +119,28 @@ class Article extends Model implements HasMedia
         return route('articles.show', $this->slug);
     }
 
+    /**
+     * Get the featured image URL
+     */
+    public function getFeaturedImageAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('cover');
+        return $media ? $media->getUrl() : null;
+    }
+
+    /**
+     * Get the featured image URL with conversion
+     */
+    public function getFeaturedImageUrl(string $conversion = ''): ?string
+    {
+        $media = $this->getFirstMedia('cover');
+        if (!$media) {
+            return null;
+        }
+        
+        return $conversion ? $media->getUrl($conversion) : $media->getUrl();
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('cover')
@@ -132,11 +156,13 @@ class Article extends Model implements HasMedia
         $this->addMediaConversion('thumb')
             ->width(300)
             ->height(200)
-            ->sharpen(10);
+            ->optimize()
+            ->nonQueued();
 
         $this->addMediaConversion('medium')
             ->width(800)
             ->height(600)
-            ->quality(80);
+            ->optimize()
+            ->nonQueued();
     }
 }

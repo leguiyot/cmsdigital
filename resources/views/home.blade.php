@@ -103,7 +103,7 @@
 
             <!-- Main Header -->
             <div class="py-6">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center justify-between mb-3 md:mb-1">
                     <!-- Social Media Icons - Desktop -->
                     <div class="flex-1 hidden md:flex items-center">
                         <div class="social-icons">
@@ -121,7 +121,7 @@
                     
                     <!-- Logo Principal -->
                     <div class="flex items-center flex-1 md:flex-none justify-center">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 md:h-24 lg:h-28 w-auto">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 md:h-32 lg:h-36 w-auto">
                     </div>
                     
                     <!-- Search Button - Desktop only -->
@@ -130,7 +130,7 @@
                             <!-- Search Toggle Button -->
                             <button @click="searchOpen = !searchOpen" 
                                     class="p-2 rounded-full hover:bg-gray-100 transition-all duration-300 hover:shadow-md">
-                                <i class="fas fa-search text-gray-700 text-lg hover:text-blue-600 transition-colors"></i>
+                                <i class="fas fa-search text-gray-700 text-lg hover:text-blue-800 transition-colors"></i>
                             </button>
                             
                             <!-- Search Input (expandable to the left) -->
@@ -229,7 +229,7 @@
         @if($featuredArticles->isNotEmpty())
         <section class="mb-8">
             <div class="relative h-96 md:h-[500px] rounded-xl overflow-hidden shadow-2xl">
-                <img src="{{ $featuredArticles->first()->featured_image ?? 'https://via.placeholder.com/1200x600?text=Noticia+Principal' }}" 
+                <img src="{{ $featuredArticles->first()->getFeaturedImageUrl() ?: 'https://via.placeholder.com/1200x600?text=Noticia+Principal' }}" 
                      alt="{{ $featuredArticles->first()->title }}"
                      class="w-full h-full object-cover">
                 <div class="absolute inset-0 gradient-overlay"></div>
@@ -254,9 +254,7 @@
                         <div class="flex items-center text-sm text-gray-300">
                             <span>Por {{ $featuredArticles->first()->author->name }}</span>
                             <span class="mx-2">•</span>
-                            <span>{{ $featuredArticles->first()->published_at->diffForHumans() }}</span>
-                            <span class="mx-2">•</span>
-                            <span>{{ $featuredArticles->first()->reading_time }} min lectura</span>
+                            <span>{{ $featuredArticles->first()->published_at->format('d/m/Y H:i') }}</span>
                         </div>
                     </div>
                 </div>
@@ -279,7 +277,7 @@
                 @foreach($featuredArticles->skip(1)->take(4) as $article)
                 <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                     <div class="relative">
-                        <img src="{{ $article->featured_image ?? 'https://via.placeholder.com/400x250?text=Noticia' }}" 
+                        <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/400x250?text=Noticia' }}" 
                              alt="{{ $article->title }}"
                              class="w-full h-48 object-cover">
                         <div class="absolute top-3 left-3">
@@ -300,7 +298,7 @@
                         </p>
                         <div class="flex items-center justify-between text-xs text-gray-500">
                             <span>{{ $article->author->name }}</span>
-                            <span>{{ $article->published_at->diffForHumans() }}</span>
+                            <span>{{ $article->published_at->format('d/m/Y H:i') }}</span>
                         </div>
                     </div>
                 </article>
@@ -326,7 +324,7 @@
                         @foreach($latestNews->take(6) as $article)
                         <article class="flex bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                             <div class="w-1/3">
-                                <img src="{{ $article->featured_image ?? 'https://via.placeholder.com/200x150?text=Noticia' }}" 
+                                <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/200x150?text=Noticia' }}" 
                                      alt="{{ $article->title }}"
                                      class="w-full h-32 object-cover">
                             </div>
@@ -336,7 +334,7 @@
                                         {{ $article->section->name }}
                                     </span>
                                     <span class="text-xs text-gray-500">
-                                        {{ $article->published_at->diffForHumans() }}
+                                        {{ $article->published_at->format('d/m/Y H:i') }}
                                     </span>
                                 </div>
                                 <h3 class="font-bold text-lg mb-2 leading-tight">
@@ -350,7 +348,6 @@
                                 </p>
                                 <div class="flex items-center justify-between text-xs text-gray-500">
                                     <span>Por {{ $article->author->name }}</span>
-                                    <span>{{ $article->reading_time }} min lectura</span>
                                 </div>
                             </div>
                         </article>
@@ -381,7 +378,7 @@
                                         </a>
                                     </h4>
                                     <div class="text-xs text-gray-500">
-                                        {{ $article->views_count }} lecturas • {{ $article->published_at->diffForHumans() }}
+                                        {{ $article->views_count }} lecturas • {{ $article->published_at->format('d/m/Y H:i') }}
                                     </div>
                                 </div>
                             </div>
@@ -461,7 +458,7 @@
                                     </a>
                                 </h4>
                                 <div class="text-xs text-gray-500">
-                                    {{ $article->published_at->diffForHumans() }} • {{ $article->author->name }}
+                                    {{ $article->published_at->format('d/m/Y H:i') }} • {{ $article->author->name }}
                                 </div>
                             </article>
                             @endforeach

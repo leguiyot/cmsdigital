@@ -2,6 +2,11 @@
 
 @section('title', isset($article) ? 'Editar Artículo' : 'Nuevo Artículo')
 
+@push('styles')
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+@endpush
+
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-gray-900">
@@ -112,6 +117,132 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
+            <!-- Featured Image Upload -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Imagen Destacada</h3>
+                
+                <!-- Current Featured Image (for editing) -->
+                @if(isset($article) && $article->getFirstMediaUrl('cover'))
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Imagen Actual</label>
+                    <div class="relative group">
+                        <img src="{{ $article->getFirstMediaUrl('cover', 'medium') }}" 
+                             alt="Imagen destacada" 
+                             class="w-full h-48 object-cover rounded-lg border border-gray-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <button type="button" onclick="removeFeaturedImage()" 
+                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-trash mr-1"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Upload New Featured Image -->
+                <div>
+                    <label for="featured_image" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ isset($article) && $article->getFirstMediaUrl('cover') ? 'Cambiar Imagen' : 'Subir Imagen Destacada' }}
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" 
+                         onclick="document.getElementById('featured_image').click()">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <span class="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    Subir archivo
+                                </span>
+                                <p class="pl-1">o arrastra y suelta</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                PNG, JPG, WEBP hasta 10MB
+                            </p>
+                        </div>
+                    </div>
+                    <input id="featured_image" name="featured_image" type="file" class="hidden" 
+                           accept="image/jpeg,image/png,image/webp" onchange="previewFeaturedImage(this)">
+                    @error('featured_image')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Image Preview -->
+                <div id="featured_image_preview" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Vista Previa</label>
+                    <div class="relative">
+                        <img id="featured_image_preview_img" src="" alt="Vista previa" 
+                             class="w-full h-48 object-cover rounded-lg border border-gray-200">
+                        <button type="button" onclick="clearFeaturedImagePreview()" 
+                                class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Images -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Galería de Imágenes</h3>
+                
+                <!-- Current Gallery Images (for editing) -->
+                @if(isset($article) && $article->getMedia('gallery')->count() > 0)
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Imágenes Actuales</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        @foreach($article->getMedia('gallery') as $media)
+                        <div class="relative group">
+                            <img src="{{ $media->getUrl('thumb') }}" 
+                                 alt="Imagen de galería" 
+                                 class="w-full h-20 object-cover rounded border border-gray-200">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                                <button type="button" onclick="removeGalleryImage({{ $media->id }})" 
+                                        class="bg-red-600 hover:bg-red-700 text-white p-1 rounded text-xs">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- Upload Gallery Images -->
+                <div>
+                    <label for="gallery_images" class="block text-sm font-medium text-gray-700 mb-2">
+                        Agregar Imágenes a la Galería
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" 
+                         onclick="document.getElementById('gallery_images').click()">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="text-xs text-gray-600">
+                                <span class="font-medium text-blue-600 hover:text-blue-500">Subir múltiples imágenes</span>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, WEBP</p>
+                        </div>
+                    </div>
+                    <input id="gallery_images" name="gallery_images[]" type="file" class="hidden" 
+                           accept="image/jpeg,image/png,image/webp" multiple onchange="previewGalleryImages(this)">
+                    @error('gallery_images')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Gallery Preview -->
+                <div id="gallery_preview" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nuevas Imágenes</label>
+                    <div id="gallery_preview_container" class="grid grid-cols-2 gap-3"></div>
+                </div>
+            </div>
+
             <!-- Publish Settings -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración de Publicación</h3>
@@ -285,7 +416,7 @@
     </div>
 </form>
 
-<!-- Simple Text Editor Enhancement -->
+<!-- Enhanced Text Editor with Image Management -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-resize textareas
@@ -329,5 +460,161 @@ document.addEventListener('DOMContentLoaded', function() {
         updateMetaDescCounter();
     }
 });
+
+// Featured Image Functions
+function previewFeaturedImage(input) {
+    const preview = document.getElementById('featured_image_preview');
+    const previewImg = document.getElementById('featured_image_preview_img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function clearFeaturedImagePreview() {
+    const input = document.getElementById('featured_image');
+    const preview = document.getElementById('featured_image_preview');
+    
+    input.value = '';
+    preview.classList.add('hidden');
+}
+
+function removeFeaturedImage() {
+    if (confirm('¿Estás seguro de que quieres eliminar la imagen destacada?')) {
+        // Add a hidden input to mark for deletion
+        const form = document.querySelector('form');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'remove_featured_image';
+        hiddenInput.value = '1';
+        form.appendChild(hiddenInput);
+        
+        // Hide the current image
+        const currentImageContainer = event.target.closest('.relative.group').parentElement;
+        currentImageContainer.style.display = 'none';
+    }
+}
+
+// Gallery Images Functions
+function previewGalleryImages(input) {
+    const preview = document.getElementById('gallery_preview');
+    const container = document.getElementById('gallery_preview_container');
+    
+    // Clear previous previews
+    container.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+        preview.classList.remove('hidden');
+        
+        Array.from(input.files).forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'relative';
+                
+                imgContainer.innerHTML = `
+                    <img src="${e.target.result}" alt="Vista previa ${index + 1}" 
+                         class="w-full h-20 object-cover rounded border border-gray-200">
+                    <button type="button" onclick="removeGalleryPreview(this, ${index})" 
+                            class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+                
+                container.appendChild(imgContainer);
+            }
+            
+            reader.readAsDataURL(file);
+        });
+    } else {
+        preview.classList.add('hidden');
+    }
+}
+
+function removeGalleryPreview(button, index) {
+    const input = document.getElementById('gallery_images');
+    const container = document.getElementById('gallery_preview_container');
+    const preview = document.getElementById('gallery_preview');
+    
+    // Remove the preview element
+    button.parentElement.remove();
+    
+    // Create new FileList without the removed file
+    const dt = new DataTransfer();
+    const files = Array.from(input.files);
+    
+    files.forEach((file, i) => {
+        if (i !== index) {
+            dt.items.add(file);
+        }
+    });
+    
+    input.files = dt.files;
+    
+    // Hide preview if no files left
+    if (input.files.length === 0) {
+        preview.classList.add('hidden');
+    }
+}
+
+function removeGalleryImage(mediaId) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
+        // Add hidden input to mark for deletion
+        const form = document.querySelector('form');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'remove_gallery_images[]';
+        hiddenInput.value = mediaId;
+        form.appendChild(hiddenInput);
+        
+        // Hide the image
+        event.target.closest('.relative.group').style.display = 'none';
+    }
+}
+
+// Drag and Drop functionality
+function setupDragAndDrop() {
+    const dropZones = document.querySelectorAll('[onclick*="click()"]');
+    
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('border-blue-500', 'bg-blue-50');
+        });
+        
+        zone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-blue-500', 'bg-blue-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const input = this.parentElement.querySelector('input[type="file"]');
+                input.files = files;
+                
+                // Trigger change event
+                const event = new Event('change', { bubbles: true });
+                input.dispatchEvent(event);
+            }
+        });
+    });
+}
+
+// Initialize drag and drop when page loads
+document.addEventListener('DOMContentLoaded', setupDragAndDrop);
 </script>
 @endsection

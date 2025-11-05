@@ -13,6 +13,22 @@ Route::get('/test', [TestController::class, 'test'])->name('test');
 
 // Rutas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Ruta de prueba para debug de imágenes
+Route::get('/debug-images', function() {
+    $article = \App\Models\Article::where('is_featured', true)->has('media')->first();
+    if ($article) {
+        $media = $article->getFirstMedia('cover');
+        return response()->json([
+            'article_title' => $article->title,
+            'media_url' => $media ? $media->getUrl() : 'No media',
+            'media_path' => $media ? $media->getPath() : 'No media',
+            'featured_image_url' => $article->getFeaturedImageUrl(),
+            'media_exists' => $media ? file_exists($media->getPath()) : false,
+        ]);
+    }
+    return response()->json(['message' => 'No featured articles with media found']);
+});
 Route::get('/articulos/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 Route::get('/seccion/{slug}', [SectionController::class, 'show'])->name('sections.show');
 

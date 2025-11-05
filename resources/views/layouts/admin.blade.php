@@ -16,19 +16,21 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Additional Styles -->
+    @stack('styles')
+    
     <style>
-        .sidebar-active { @apply bg-gray-800 text-white; }
-        .sidebar-inactive { @apply text-gray-300 hover:bg-gray-700 hover:text-white; }
+        .sidebar-active { @apply bg-blue-600 text-white; }
+        .sidebar-inactive { @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900; }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-50">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
-        <div class="flex flex-col w-64 bg-gray-900">
-            <div class="flex items-center justify-center h-16 px-4 bg-gray-800">
+        <div class="flex flex-col w-64 bg-white border-r border-gray-200">
+            <div class="flex items-center justify-center h-16 px-4 bg-white border-b border-gray-200">
                 <div class="flex items-center space-x-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-6 w-auto">
-                    <h1 class="text-base font-bold text-white">CMS Digital</h1>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-auto">
+                    
                 </div>
             </div>
             
@@ -130,18 +132,18 @@
             </nav>
 
             <!-- User Profile -->
-            <div class="px-2 py-4 border-t border-gray-700">
+            <div class="px-2 py-4 border-t border-gray-200">
                 <div class="flex items-center px-4 py-2">
-                    <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=374151&color=fff" alt="{{ auth()->user()->name }}">
+                    <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=4f46e5&color=fff" alt="{{ auth()->user()->name }}">
                     <div class="ml-3">
-                        <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-gray-300">{{ auth()->user()->position ?? 'Usuario' }}</p>
+                        <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-gray-500">{{ auth()->user()->position ?? 'Usuario' }}</p>
                     </div>
                 </div>
                 <div class="mt-2 px-4">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full text-left px-2 py-1 text-sm text-gray-300 hover:text-white rounded-md hover:bg-gray-700">
+                        <button type="submit" class="w-full text-left px-2 py-1 text-sm text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100">
                             Cerrar Sesión
                         </button>
                     </form>

@@ -14,11 +14,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Obtener artículos destacados
+        // Obtener artículos destacados (ordenados por última vez marcados como destacados)
         $featuredArticles = Article::where('status', 'published')
             ->where('is_featured', true)
             ->with(['author', 'section'])
-            ->orderBy('published_at', 'desc')
+            ->orderBy('featured_at', 'desc') // El último marcado como destacado va primero
+            ->orderBy('published_at', 'desc') // Luego por fecha de publicación
             ->take(5)
             ->get();
 

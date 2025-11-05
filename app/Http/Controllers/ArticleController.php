@@ -78,6 +78,8 @@ class ArticleController extends Controller
             'tags' => 'nullable|string',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB max
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
         ]);
 
         $articleData = $request->only([
@@ -90,6 +92,11 @@ class ArticleController extends Controller
             $articleData['published_at'] = now();
         } elseif ($request->published_at) {
             $articleData['published_at'] = $request->published_at;
+        }
+
+        // Handle featured_at
+        if ($request->has('is_featured') && $request->is_featured) {
+            $articleData['featured_at'] = now();
         }
 
         // Process meta_keywords and tags as arrays
@@ -109,6 +116,20 @@ class ArticleController extends Controller
         $articleData['reading_time'] = max(1, ceil($wordCount / 200));
 
         $article = Article::create($articleData);
+
+        // Handle featured image upload
+        if ($request->hasFile('featured_image')) {
+            $article->addMediaFromRequest('featured_image')
+                    ->toMediaCollection('cover');
+        }
+
+        // Handle gallery images upload
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $file) {
+                $article->addMedia($file)
+                        ->toMediaCollection('gallery');
+            }
+        }
 
         return redirect()->route('admin.articles.index')
                         ->with('success', 'Artículo creado exitosamente.');
@@ -159,6 +180,11 @@ class ArticleController extends Controller
             'tags' => 'nullable|string',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB max
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
+            'remove_featured_image' => 'nullable|boolean',
+            'remove_gallery_images' => 'nullable|array',
+            'remove_gallery_images.*' => 'nullable|integer',
         ]);
 
         $articleData = $request->only([
@@ -173,6 +199,17 @@ class ArticleController extends Controller
             $articleData['published_at'] = $request->published_at;
         } elseif ($request->status !== 'published') {
             $articleData['published_at'] = null;
+        }
+
+        // Handle featured_at
+        if ($request->has('is_featured')) {
+            if ($request->is_featured && !$article->is_featured) {
+                // Se está marcando como destacado por primera vez o se re-marca
+                $articleData['featured_at'] = now();
+            } elseif (!$request->is_featured && $article->is_featured) {
+                // Se está quitando de destacados
+                $articleData['featured_at'] = null;
+            }
         }
 
         // Process meta_keywords and tags as arrays
@@ -193,6 +230,36 @@ class ArticleController extends Controller
         $articleData['reading_time'] = max(1, ceil($wordCount / 200));
 
         $article->update($articleData);
+
+        // Handle featured image removal
+        if ($request->has('remove_featured_image') && $request->remove_featured_image) {
+            $article->clearMediaCollection('cover');
+        }
+
+        // Handle featured image upload
+        if ($request->hasFile('featured_image')) {
+            $article->clearMediaCollection('cover'); // Remove old image first
+            $article->addMediaFromRequest('featured_image')
+                    ->toMediaCollection('cover');
+        }
+
+        // Handle gallery images removal
+        if ($request->has('remove_gallery_images')) {
+            foreach ($request->remove_gallery_images as $mediaId) {
+                $media = $article->getMedia('gallery')->where('id', $mediaId)->first();
+                if ($media) {
+                    $media->delete();
+                }
+            }
+        }
+
+        // Handle new gallery images upload
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $file) {
+                $article->addMedia($file)
+                        ->toMediaCollection('gallery');
+            }
+        }
 
         return redirect()->route('admin.articles.index')
                         ->with('success', 'Artículo actualizado exitosamente.');
@@ -237,9 +304,18 @@ class ArticleController extends Controller
      */
     public function feature(Article $article)
     {
-        $article->update(['is_featured' => !$article->is_featured]);
+        $updateData = ['is_featured' => !$article->is_featured];
+        
+        // Si se está marcando como destacado, actualizar el timestamp
+        if (!$article->is_featured) {
+            $updateData['featured_at'] = now();
+        } else {
+            $updateData['featured_at'] = null;
+        }
+        
+        $article->update($updateData);
 
-        $message = $article->is_featured ? 'Artículo marcado como destacado.' : 'Artículo removido de destacados.';
+        $message = $article->is_featured ? 'Artículo removido de destacados.' : 'Artículo marcado como destacado.';
 
         return back()->with('success', $message);
     }
