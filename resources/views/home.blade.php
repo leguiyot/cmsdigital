@@ -6,14 +6,35 @@
     <title>CMS Digital - Noticias y Actualidad</title>
     <meta name="description" content="Tu fuente confiable de noticias y actualidad. Mantente informado con las últimas noticias, deportes, política y más.">
     
+    <!-- Google Fonts - Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Simple Icons for X (Twitter) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg">
     
     <style>
         .gradient-overlay {
@@ -22,70 +43,130 @@
         .breaking-news {
             animation: pulse 2s infinite;
         }
+        /* Custom X icon */
+        .icon-x {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg role='img' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EX%3C/title%3E%3Cpath fill='%23000000' d='M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Custom Facebook icon */
+        .icon-facebook {
+            display: inline-block;
+            width: 22px;
+            height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%231877f2' d='M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 3.667h-3.533v7.98H9.101z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Social icons container */
+        .social-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Custom Twitter icon */
+        .icon-twitter {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%231da1f2' d='M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
     <header class="bg-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4">
-            <!-- Top Bar -->
-            <div class="border-b border-gray-200 py-2">
-                <div class="flex justify-between items-center text-sm">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-gray-600">{{ now()->format('l, j \d\e F \d\e Y') }}</span>
-                        <span class="text-red-600 font-semibold">
-                            <i class="fas fa-thermometer-half mr-1"></i>
-                            22°C Madrid
-                        </span>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <a href="#" class="text-gray-600 hover:text-blue-600">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             <!-- Main Header -->
             <div class="py-6">
-                <div class="flex flex-col items-center justify-center text-center mb-6">
-                    <!-- Logo Principal Centrado -->
-                    <div class="mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 md:h-20 lg:h-24 w-auto mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <!-- Social Media Icons - Desktop -->
+                    <div class="flex-1 hidden md:flex items-center">
+                        <div class="social-icons">
+                            <a href="#" class="social-icon hover:scale-125">
+                                <span class="icon-facebook"></span>
+                            </a>
+                            <a href="#" class="social-icon hover:scale-125">
+                                <i class="fab fa-instagram text-pink-500" style="font-size: 20px;"></i>
+                            </a>
+                            <a href="#" class="social-icon hover:scale-125">
+                                <span class="icon-x"></span>
+                            </a>
+                        </div>
                     </div>
-                    <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-2">
-                        CMS Digital
-                    </h1>
-                    <p class="text-sm md:text-base text-gray-500">Noticias y actualidad</p>
+                    
+                    <!-- Logo Principal -->
+                    <div class="flex items-center flex-1 md:flex-none justify-center">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 md:h-24 lg:h-28 w-auto">
+                    </div>
+                    
+                    <!-- Search Button - Desktop only -->
+                    <div class="flex-1 hidden md:flex justify-end relative">
+                        <div class="flex items-center space-x-4" x-data="{ searchOpen: false }">
+                            <!-- Search Toggle Button -->
+                            <button @click="searchOpen = !searchOpen" 
+                                    class="p-2 rounded-full hover:bg-gray-100 transition-all duration-300 hover:shadow-md">
+                                <i class="fas fa-search text-gray-700 text-lg hover:text-blue-600 transition-colors"></i>
+                            </button>
+                            
+                            <!-- Search Input (expandable to the left) -->
+                            <div x-show="searchOpen" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 scale-95 translate-x-4"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-x-0"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 scale-100 translate-x-0"
+                                 x-transition:leave-end="opacity-0 scale-95 translate-x-4"
+                                 class="absolute right-12 top-0 z-10 bg-white shadow-xl rounded-full border border-gray-200">
+                                <div class="relative">
+                                    <input type="text" placeholder="Buscar noticias..." 
+                                           x-ref="searchInput"
+                                           @click.away="searchOpen = false"
+                                           @keydown.escape="searchOpen = false"
+                                           class="w-72 pl-12 pr-4 py-2.5 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent">
+                                    <i class="fas fa-search absolute left-4 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Navegación y búsqueda -->
-                <div class="flex justify-between items-center">
-                    <div class="flex-1"></div>
-                    
-                    <!-- Search -->
-                    <div class="hidden md:flex items-center space-x-4">
-                        <div class="relative">
-                            <input type="text" placeholder="Buscar noticias..." 
-                                   class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                        </div>
-                        @auth
-                            <a href="{{ route('dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                Panel Admin
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800">Iniciar Sesión</a>
-                        @endauth
+                <!-- Social Media Icons - Mobile (below logo) -->
+                <div class="md:hidden flex justify-center mb-4">
+                    <div class="social-icons">
+                        <a href="#" class="social-icon hover:scale-125">
+                            <span class="icon-facebook"></span>
+                        </a>
+                        <a href="#" class="social-icon hover:scale-125">
+                            <i class="fab fa-instagram text-pink-500" style="font-size: 20px;"></i>
+                        </a>
+                        <a href="#" class="social-icon hover:scale-125">
+                            <span class="icon-x"></span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -93,21 +174,47 @@
             <!-- Navigation -->
             <nav class="py-3 border-t border-gray-200">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-8">
-                        <a href="{{ route('home') }}" class="font-semibold text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-home mr-1"></i>
-                            Inicio
-                        </a>
-                        @foreach($sections->take(6) as $section)
-                            <a href="{{ route('sections.show', $section->slug) }}" 
-                               class="text-gray-700 hover:text-blue-600 transition-colors">
-                                {{ $section->name }}
-                            </a>
+                    <div class="hidden md:flex items-center justify-center space-x-8 flex-1">
+                        @foreach($sections->whereNull('parent_id')->take(8) as $section)
+                            @php
+                                $hasSubsections = $sections->where('parent_id', $section->id)->count() > 0;
+                            @endphp
+                            
+                            @if($hasSubsections)
+                                <!-- Sección con submenu -->
+                                <div class="relative group">
+                                    <a href="{{ route('sections.show', $section->slug) }}" 
+                                       class="relative text-gray-700 group transition-colors duration-300 flex items-center">
+                                        {{ $section->name }}
+                                        <i class="fas fa-chevron-down ml-1 text-xs text-gray-500 group-hover:text-blue-600 transition-colors"></i>
+                                        <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                                    </a>
+                                    
+                                    <!-- Submenu dropdown -->
+                                    <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                        <div class="py-2">
+                                            @foreach($sections->where('parent_id', $section->id) as $subsection)
+                                                <a href="{{ route('sections.show', $subsection->slug) }}" 
+                                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                                    {{ $subsection->name }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Sección normal sin submenu -->
+                                <a href="{{ route('sections.show', $section->slug) }}" 
+                                   class="relative text-gray-700 group transition-colors duration-300">
+                                    {{ $section->name }}
+                                    <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                                </a>
+                            @endif
                         @endforeach
                     </div>
                     
                     <!-- Mobile Menu Button -->
-                    <button class="md:hidden" x-data x-on:click="$dispatch('toggle-mobile-menu')">
+                    <button class="md:hidden mx-auto" x-data x-on:click="$dispatch('toggle-mobile-menu')">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
@@ -423,6 +530,11 @@
                         <li><a href="#" class="text-gray-300 hover:text-white">Publicidad</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white">Términos de Uso</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white">Privacidad</a></li>
+                        @auth
+                        <li><a href="{{ route('dashboard') }}" class="text-blue-400 hover:text-blue-300">Panel Admin</a></li>
+                        @else
+                        <li><a href="{{ route('login') }}" class="text-blue-400 hover:text-blue-300">Iniciar Sesión</a></li>
+                        @endauth
                     </ul>
                 </div>
                 
@@ -454,12 +566,31 @@
                 </button>
             </div>
             <nav class="space-y-4">
-                <a href="{{ route('home') }}" class="block py-2 text-blue-600 font-semibold">Inicio</a>
-                @foreach($sections as $section)
-                    <a href="{{ route('sections.show', $section->slug) }}" 
-                       class="block py-2 text-gray-700 hover:text-blue-600">
-                        {{ $section->name }}
-                    </a>
+                @foreach($sections->whereNull('parent_id')->sortBy('order') as $section)
+                    @php
+                        $hasSubsections = $sections->where('parent_id', $section->id)->count() > 0;
+                    @endphp
+                    
+                    <div>
+                        <a href="{{ route('sections.show', $section->slug) }}" 
+                           class="block py-2 text-gray-700 hover:text-blue-600 {{ $hasSubsections ? 'font-medium' : '' }}">
+                            {{ $section->name }}
+                            @if($hasSubsections)
+                                <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                            @endif
+                        </a>
+                        
+                        @if($hasSubsections)
+                            <div class="ml-4 mt-2 space-y-2">
+                                @foreach($sections->where('parent_id', $section->id) as $subsection)
+                                    <a href="{{ route('sections.show', $subsection->slug) }}" 
+                                       class="block py-1 text-sm text-gray-600 hover:text-blue-600">
+                                        • {{ $subsection->name }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
                 @endforeach
             </nav>
         </div>

@@ -22,15 +22,18 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        // Obtener secciones activas
+        // Obtener secciones activas con sus subsecciones
         $sections = Section::where('is_active', true)
+            ->with(['children' => function($query) {
+                $query->where('is_active', true)->orderBy('order')->orderBy('name');
+            }])
             ->orderBy('order')
             ->orderBy('name')
             ->get();
 
-        // Obtener últimos artículos por sección
+        // Obtener últimos artículos por sección (solo secciones principales sin parent_id)
         $latestBySection = [];
-        foreach ($sections->take(6) as $section) {
+        foreach ($sections->whereNull('parent_id')->take(6) as $section) {
             $latestBySection[$section->slug] = Article::where('status', 'published')
                 ->where('section_id', $section->id)
                 ->with(['author'])

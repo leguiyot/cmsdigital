@@ -14,20 +14,28 @@ class SectionsSeeder extends Seeder
     {
         $sections = [
             [
-                'name' => 'Política',
-                'slug' => 'politica',
-                'description' => 'Noticias y análisis político nacional e internacional',
+                'name' => 'Política Local',
+                'slug' => 'politica-local',
+                'description' => 'Noticias de política municipal y regional',
                 'color' => '#dc2626',
-                'icon' => 'government',
+                'icon' => 'building-office',
                 'order' => 1,
             ],
             [
-                'name' => 'Economía',
-                'slug' => 'economia',
-                'description' => 'Información económica, mercados y finanzas',
-                'color' => '#059669',
-                'icon' => 'chart-line',
+                'name' => 'Política Nacional',
+                'slug' => 'politica-nacional',
+                'description' => 'Noticias y análisis político nacional',
+                'color' => '#b91c1c',
+                'icon' => 'government',
                 'order' => 2,
+            ],
+            [
+                'name' => 'Policiales',
+                'slug' => 'policiales',
+                'description' => 'Noticias policiales y de seguridad',
+                'color' => '#1f2937',
+                'icon' => 'shield-check',
+                'order' => 3,
             ],
             [
                 'name' => 'Sociedad',
@@ -35,7 +43,7 @@ class SectionsSeeder extends Seeder
                 'description' => 'Temas sociales, educación y cultura',
                 'color' => '#7c3aed',
                 'icon' => 'users',
-                'order' => 3,
+                'order' => 4,
             ],
             [
                 'name' => 'Deportes',
@@ -43,38 +51,30 @@ class SectionsSeeder extends Seeder
                 'description' => 'Cobertura deportiva nacional e internacional',
                 'color' => '#ea580c',
                 'icon' => 'trophy',
-                'order' => 4,
-            ],
-            [
-                'name' => 'Tecnología',
-                'slug' => 'tecnologia',
-                'description' => 'Innovación, ciencia y tecnología',
-                'color' => '#0284c7',
-                'icon' => 'cpu-chip',
                 'order' => 5,
             ],
             [
-                'name' => 'Cultura',
-                'slug' => 'cultura',
-                'description' => 'Arte, literatura, música y espectáculos',
-                'color' => '#be185d',
-                'icon' => 'academic-cap',
+                'name' => 'Economía',
+                'slug' => 'economia',
+                'description' => 'Información económica, mercados y finanzas',
+                'color' => '#059669',
+                'icon' => 'chart-line',
                 'order' => 6,
             ],
             [
-                'name' => 'Internacional',
-                'slug' => 'internacional',
-                'description' => 'Noticias del mundo y política exterior',
-                'color' => '#0891b2',
-                'icon' => 'globe',
+                'name' => 'Valle de Uco',
+                'slug' => 'valle-de-uco',
+                'description' => 'Noticias locales del Valle de Uco',
+                'color' => '#16a34a',
+                'icon' => 'map',
                 'order' => 7,
             ],
             [
-                'name' => 'Opinión',
-                'slug' => 'opinion',
-                'description' => 'Columnas de opinión y editoriales',
-                'color' => '#ca8a04',
-                'icon' => 'chat-bubble-left-right',
+                'name' => 'Entretenimiento',
+                'slug' => 'entretenimiento',
+                'description' => 'Espectáculos, cultura y entretenimiento',
+                'color' => '#be185d',
+                'icon' => 'film',
                 'order' => 8,
             ],
         ];
@@ -87,53 +87,21 @@ class SectionsSeeder extends Seeder
         }
 
         // Crear subsecciones para algunas secciones principales
-        $politica = Section::where('slug', 'politica')->first();
-        if ($politica) {
+        $sociedad = Section::where('slug', 'sociedad')->first();
+        if ($sociedad) {
             $subsecciones = [
                 [
-                    'name' => 'Gobierno',
-                    'slug' => 'gobierno',
-                    'description' => 'Noticias del gobierno nacional',
-                    'parent_id' => $politica->id,
+                    'name' => 'Internacionales',
+                    'slug' => 'internacionales',
+                    'description' => 'Noticias del mundo y política exterior',
+                    'parent_id' => $sociedad->id,
+                    'color' => '#0891b2',
+                    'icon' => 'globe',
                     'order' => 1,
-                ],
-                [
-                    'name' => 'Congreso',
-                    'slug' => 'congreso',
-                    'description' => 'Actividad legislativa',
-                    'parent_id' => $politica->id,
-                    'order' => 2,
                 ],
             ];
 
             foreach ($subsecciones as $subseccion) {
-                Section::firstOrCreate(
-                    ['slug' => $subseccion['slug']],
-                    $subseccion
-                );
-            }
-        }
-
-        $deportes = Section::where('slug', 'deportes')->first();
-        if ($deportes) {
-            $subseccionesDeportes = [
-                [
-                    'name' => 'Fútbol',
-                    'slug' => 'futbol',
-                    'description' => 'Fútbol nacional e internacional',
-                    'parent_id' => $deportes->id,
-                    'order' => 1,
-                ],
-                [
-                    'name' => 'Otros Deportes',
-                    'slug' => 'otros-deportes',
-                    'description' => 'Deportes diversos',
-                    'parent_id' => $deportes->id,
-                    'order' => 2,
-                ],
-            ];
-
-            foreach ($subseccionesDeportes as $subseccion) {
                 Section::firstOrCreate(
                     ['slug' => $subseccion['slug']],
                     $subseccion
