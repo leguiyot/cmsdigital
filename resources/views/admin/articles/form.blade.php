@@ -1,3 +1,30 @@
+{{-- 
+    Formulario de creación y edición de artículos
+    
+    Esta vista maneja tanto la creación como la edición de artículos en el panel administrativo.
+    Incluye funcionalidades avanzadas:
+    
+    Campos principales:
+    - Título, extracto y cuerpo del artículo (con editor enriquecido)
+    - Selección de sección y estado de publicación
+    - Gestión de fechas de publicación
+    
+    Gestión de imágenes:
+    - Imagen destacada con vista previa y opción de eliminar
+    - Galería de imágenes con drag & drop
+    - Integración con Spatie Media Library
+    
+    SEO y metadatos:
+    - Título SEO, meta descripción y palabras clave
+    - Tags del artículo
+    - Configuraciones de comentarios
+    
+    Funcionalidades JavaScript:
+    - Vista previa de imágenes antes de subir
+    - Validación de tipos de archivo
+    - Interfaz drag & drop para galería
+    - Confirmación antes de eliminar imágenes
+--}}
 @extends('layouts.admin')
 
 @section('title', isset($article) ? 'Editar Artículo' : 'Nuevo Artículo')

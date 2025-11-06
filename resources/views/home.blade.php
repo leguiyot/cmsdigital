@@ -1,3 +1,20 @@
+{{-- 
+    Vista principal del diario digital (Página de inicio)
+    
+    Esta vista constituye la portada del sitio web del diario digital.
+    Presenta los contenidos más relevantes organizados en diferentes secciones:
+    - Artículos destacados (carousel principal)
+    - Últimas noticias por sección
+    - Artículos más leídos
+    - Navegación por secciones
+    
+    Datos recibidos del HomeController:
+    - $featuredArticles: Artículos marcados como destacados (ordenados por featured_at)
+    - $sections: Secciones activas con sus subsecciones
+    - $latestBySection: Últimos artículos agrupados por sección
+    - $mostRead: Artículos más leídos de la semana
+    - $latestNews: Lista general de noticias recientes
+--}}
 <!DOCTYPE html>
 <html lang="es">
 <head>

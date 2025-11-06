@@ -1,3 +1,35 @@
+{{-- 
+    Lista de artículos del panel de administración
+    
+    Esta vista muestra un listado completo de todos los artículos del sistema
+    con funcionalidades avanzadas de gestión:
+    
+    Funcionalidades de filtrado:
+    - Búsqueda por título, contenido o autor
+    - Filtro por estado (publicado, borrador, en revisión)
+    - Filtro por sección
+    - Ordenamiento por diferentes criterios
+    
+    Gestión de artículos:
+    - Vista previa de imagen destacada
+    - Indicadores de estado visual
+    - Acciones rápidas (editar, eliminar, publicar/despublicar)
+    - Toggle de artículos destacados
+    - Información de autor y fechas
+    
+    Datos mostrados por artículo:
+    - Título y extracto
+    - Estado de publicación
+    - Sección asignada
+    - Autor y fechas de creación/publicación
+    - Contadores de vistas y comentarios
+    - Estado de destacado
+    
+    Datos recibidos del ArticleController:
+    - $articles: Colección paginada de artículos filtrados
+    - $sections: Lista de secciones para el filtro
+    - Parámetros de filtrado actuales para mantener estado
+--}}
 @extends('layouts.admin')
 
 @section('title', 'Gestión de Artículos')

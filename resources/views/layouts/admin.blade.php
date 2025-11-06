@@ -1,3 +1,20 @@
+{{-- 
+    Layout principal del panel de administración
+    
+    Este layout constituye la estructura base para todas las páginas del área administrativa.
+    Incluye:
+    - Sidebar de navegación con menús organizados por funcionalidad
+    - Header con información del usuario y notificaciones
+    - Área de contenido principal que se rellena con @yield('content')
+    - Scripts y estilos compartidos
+    
+    Funcionalidades:
+    - Navegación colapsible con Alpine.js
+    - Indicadores de sección activa
+    - Responsive design para móviles
+    - CSRF token para formularios
+    - Stack de estilos y scripts adicionales
+--}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>

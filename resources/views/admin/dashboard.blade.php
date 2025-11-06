@@ -1,3 +1,27 @@
+{{-- 
+    Dashboard del panel de administración
+    
+    Esta vista proporciona una visión general del estado del CMS y las métricas principales.
+    Se organiza en diferentes secciones para facilitar la gestión:
+    
+    Métricas principales:
+    - Contadores de artículos (total, publicados, borradores)
+    - Comentarios pendientes de moderación
+    - Total de usuarios y secciones
+    
+    Contenido dinámico:
+    - Lista de artículos recientes (personalizada según rol del usuario)
+    - Comentarios pendientes que requieren revisión
+    - Artículos más leídos de la semana
+    - Estadísticas de contenido por sección
+    
+    Datos recibidos del DashboardController:
+    - $stats: Array con contadores generales del sistema
+    - $recentArticles: Artículos recientes (filtrados por usuario si es autor)
+    - $pendingComments: Comentarios pendientes (solo para admin/editores)
+    - $topArticles: Artículos más populares de la semana
+    - $sectionStats: Distribución de contenido por sección
+--}}
 @extends('layouts.admin')
 
 @section('title', 'Dashboard')

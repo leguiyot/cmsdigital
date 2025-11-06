@@ -10,16 +10,29 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
+/**
+ * Controlador para la gestión de artículos del CMS
+ * Maneja el CRUD completo de artículos, incluyendo:
+ * - Listado con filtros y búsqueda
+ * - Creación y edición con carga de imágenes
+ * - Publicación y gestión de destacados
+ * - Eliminación de artículos
+ */
 class ArticleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra la lista de artículos con filtros de búsqueda
+     * Permite filtrar por: texto, estado y sección
+     * 
+     * @param Request $request - Parámetros de filtrado
+     * @return \Illuminate\View\View - Vista con lista paginada de artículos
      */
     public function index(Request $request)
     {
+        // Construir consulta base con relaciones necesarias
         $query = Article::with(['author', 'section']);
 
-        // Filtro por búsqueda
+        // Aplicar filtro por búsqueda de texto en múltiples campos
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -32,39 +45,50 @@ class ArticleController extends Controller
             });
         }
 
-        // Filtro por estado
+        // Aplicar filtro por estado del artículo
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filtro por sección
+        // Aplicar filtro por sección
         if ($request->filled('section')) {
             $query->where('section_id', $request->section);
         }
 
-        // Ordenar por fecha de creación descendente
+        // Ordenar por fecha de creación más reciente primero
         $query->orderBy('created_at', 'desc');
 
+        // Paginar resultados y mantener parámetros de búsqueda
         $articles = $query->paginate(15)->withQueryString();
+        
+        // Obtener secciones activas para el filtro
         $sections = Section::active()->orderBy('name')->get();
 
         return view('admin.articles.index', compact('articles', 'sections'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear un nuevo artículo
+     * 
+     * @return \Illuminate\View\View - Vista del formulario de creación
      */
     public function create()
     {
+        // Obtener todas las secciones para el selector
         $sections = Section::all();
         return view('admin.articles.form', compact('sections'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo artículo en la base de datos
+     * Incluye validación, procesamiento de datos y manejo de imágenes
+     * 
+     * @param Request $request - Datos del formulario
+     * @return \Illuminate\Http\RedirectResponse - Redirección con mensaje de éxito
      */
     public function store(Request $request)
     {
+        // Validar todos los campos del formulario incluyendo imágenes
         $request->validate([
             'title' => 'required|string|max:255',
             'excerpt' => 'required|string|max:500',
@@ -78,28 +102,29 @@ class ArticleController extends Controller
             'tags' => 'nullable|string',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB max
+            'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB máximo
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
         ]);
 
+        // Preparar datos básicos del artículo
         $articleData = $request->only([
             'title', 'excerpt', 'body', 'section_id', 'status',
             'seo_title', 'meta_description', 'is_featured', 'allow_comments'
         ]);
 
-        // Handle published_at
+        // Manejar fecha de publicación automática
         if ($request->status === 'published' && !$request->published_at) {
             $articleData['published_at'] = now();
         } elseif ($request->published_at) {
             $articleData['published_at'] = $request->published_at;
         }
 
-        // Handle featured_at
+        // Manejar timestamp de artículo destacado
         if ($request->has('is_featured') && $request->is_featured) {
             $articleData['featured_at'] = now();
         }
 
-        // Process meta_keywords and tags as arrays
+        // Procesar meta_keywords y tags como arrays
         if ($request->meta_keywords) {
             $articleData['meta_keywords'] = array_map('trim', explode(',', $request->meta_keywords));
         }
@@ -108,22 +133,23 @@ class ArticleController extends Controller
             $articleData['tags'] = array_map('trim', explode(',', $request->tags));
         }
 
-        // Set author
+        // Establecer autor actual
         $articleData['author_id'] = Auth::id();
 
-        // Calculate reading time (average reading speed: 200 words per minute)
+        // Calcular tiempo de lectura (promedio: 200 palabras por minuto)
         $wordCount = str_word_count(strip_tags($request->body));
         $articleData['reading_time'] = max(1, ceil($wordCount / 200));
 
+        // Crear el artículo
         $article = Article::create($articleData);
 
-        // Handle featured image upload
+        // Manejar subida de imagen destacada
         if ($request->hasFile('featured_image')) {
             $article->addMediaFromRequest('featured_image')
                     ->toMediaCollection('cover');
         }
 
-        // Handle gallery images upload
+        // Manejar subida de imágenes de galería
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $file) {
                 $article->addMedia($file)
@@ -136,10 +162,15 @@ class ArticleController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra un artículo específico en la vista pública
+     * Incrementa el contador de vistas
+     * 
+     * @param string $slug - Slug único del artículo
+     * @return \Illuminate\View\View - Vista del artículo público
      */
     public function show(string $slug)
     {
+        // Obtener artículo publicado con relaciones necesarias
         $article = Article::where('slug', $slug)
                           ->published()
                           ->with(['author', 'section', 'comments' => function ($query) {
@@ -147,23 +178,32 @@ class ArticleController extends Controller
                           }])
                           ->firstOrFail();
 
-        // Incrementar contador de vistas
+        // Incrementar contador de vistas del artículo
         $article->incrementViews();
 
         return view('articles.show', compact('article'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario para editar un artículo existente
+     * 
+     * @param Article $article - Instancia del artículo a editar
+     * @return \Illuminate\View\View - Vista del formulario de edición
      */
     public function edit(Article $article)
     {
+        // Obtener todas las secciones para el selector
         $sections = Section::all();
         return view('admin.articles.form', compact('article', 'sections'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un artículo existente en la base de datos
+     * Incluye manejo de imágenes (agregar/eliminar) y actualización de datos
+     * 
+     * @param Request $request - Datos del formulario
+     * @param Article $article - Instancia del artículo a actualizar
+     * @return \Illuminate\Http\RedirectResponse - Redirección con mensaje de éxito
      */
     public function update(Request $request, Article $article)
     {
@@ -266,10 +306,15 @@ class ArticleController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un artículo de la base de datos
+     * También elimina automáticamente las imágenes asociadas
+     * 
+     * @param Article $article - Instancia del artículo a eliminar
+     * @return \Illuminate\Http\RedirectResponse - Redirección con mensaje de éxito
      */
     public function destroy(Article $article)
     {
+        // Eliminar artículo (las imágenes se eliminan automáticamente por Spatie Media Library)
         $article->delete();
 
         return redirect()->route('admin.articles.index')
@@ -277,7 +322,11 @@ class ArticleController extends Controller
     }
 
     /**
-     * Publish an article
+     * Publica un artículo (cambia estado a published)
+     * Establece fecha de publicación si no existe
+     * 
+     * @param Article $article - Artículo a publicar
+     * @return \Illuminate\Http\RedirectResponse - Redirección con mensaje de éxito
      */
     public function publish(Article $article)
     {
@@ -290,7 +339,10 @@ class ArticleController extends Controller
     }
 
     /**
-     * Unpublish an article
+     * Despublica un artículo (cambia estado a draft)
+     * 
+     * @param Article $article - Artículo a despublicar
+     * @return \Illuminate\Http\RedirectResponse - Redirección con mensaje de éxito
      */
     public function unpublish(Article $article)
     {
@@ -300,13 +352,18 @@ class ArticleController extends Controller
     }
 
     /**
-     * Toggle featured status
+     * Alterna el estado destacado de un artículo
+     * Actualiza el timestamp featured_at cuando se marca como destacado
+     * 
+     * @param Article $article - Artículo a modificar
+     * @return \Illuminate\Http\RedirectResponse - Redirección con mensaje de éxito
      */
     public function feature(Article $article)
     {
+        // Preparar datos de actualización
         $updateData = ['is_featured' => !$article->is_featured];
         
-        // Si se está marcando como destacado, actualizar el timestamp
+        // Si se está marcando como destacado, actualizar timestamp
         if (!$article->is_featured) {
             $updateData['featured_at'] = now();
         } else {
@@ -315,6 +372,7 @@ class ArticleController extends Controller
         
         $article->update($updateData);
 
+        // Mensaje dinámico según la acción realizada
         $message = $article->is_featured ? 'Artículo removido de destacados.' : 'Artículo marcado como destacado.';
 
         return back()->with('success', $message);
