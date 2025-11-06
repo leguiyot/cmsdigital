@@ -7,6 +7,15 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon.png') }}">
+        <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+        <meta name="msapplication-TileImage" content="{{ asset('favicon.png') }}">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
         <!-- Google Fonts - Montserrat -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

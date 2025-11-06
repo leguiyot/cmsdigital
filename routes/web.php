@@ -5,30 +5,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\SectionController;
-use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
-
-// Ruta de prueba
-Route::get('/test', [TestController::class, 'test'])->name('test');
 
 // Rutas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Ruta de prueba para debug de imágenes
-Route::get('/debug-images', function() {
-    $article = \App\Models\Article::where('is_featured', true)->has('media')->first();
-    if ($article) {
-        $media = $article->getFirstMedia('cover');
-        return response()->json([
-            'article_title' => $article->title,
-            'media_url' => $media ? $media->getUrl() : 'No media',
-            'media_path' => $media ? $media->getPath() : 'No media',
-            'featured_image_url' => $article->getFeaturedImageUrl(),
-            'media_exists' => $media ? file_exists($media->getPath()) : false,
-        ]);
-    }
-    return response()->json(['message' => 'No featured articles with media found']);
-});
 Route::get('/articulos/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 Route::get('/seccion/{slug}', [SectionController::class, 'show'])->name('sections.show');
 
@@ -46,6 +26,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'update' => 'admin.articles.update',
         'destroy' => 'admin.articles.destroy',
     ]);
+    
+    // Gestión de galería de medios
+    Route::resource('admin/media', App\Http\Controllers\MediaGalleryController::class)->middleware('fix.media.disk')->names([
+        'index' => 'admin.media.index',
+        'create' => 'admin.media.create',
+        'store' => 'admin.media.store',
+        'show' => 'admin.media.show',
+        'edit' => 'admin.media.edit',
+        'update' => 'admin.media.update',
+        'destroy' => 'admin.media.destroy',
+    ]);
+    
+    // API para galería de medios
+    Route::get('api/media', [App\Http\Controllers\MediaGalleryController::class, 'api'])->name('api.media');
+    
+    // Ruta específica para mostrar media con modelo CustomMedia
+    Route::get('admin/media/{media}/view', function($id) {
+        $media = \App\Models\CustomMedia::findOrFail($id);
+        return view('admin.media.show', compact('media'));
+    })->name('admin.media.view');
     
     // Gestión de secciones
     Route::resource('admin/sections', SectionController::class)->except(['show'])->names([

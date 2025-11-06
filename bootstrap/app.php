@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Aplicar middleware solo a rutas admin/media específicas, no a todo el grupo web
+        $middleware->alias([
+            'fix.media.disk' => \App\Http\Middleware\FixMediaDisk::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

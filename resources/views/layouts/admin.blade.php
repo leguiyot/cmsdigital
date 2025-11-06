@@ -24,6 +24,15 @@
 
     <title>{{ config('app.name', 'Laravel') }} - Panel de Administración</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <meta name="msapplication-TileImage" content="{{ asset('favicon.png') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
     <!-- Google Fonts - Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,10 +53,10 @@
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         <div class="flex flex-col w-64 bg-white border-r border-gray-200">
-            <div class="flex items-center justify-center h-16 px-4 bg-white border-b border-gray-200">
+            <div class="flex items-center justify-center h-20 px-4 bg-white border-b border-gray-200">
                 <div class="flex items-center space-x-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-auto">
-                    
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 md:h-28 lg:h-32 w-auto">
+
                 </div>
             </div>
             
@@ -85,6 +94,15 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Galería de Medios -->
+                <a href="{{ route('admin.media.index') }}" 
+                   class="flex items-center px-4 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.media.*') ? 'sidebar-active' : 'sidebar-inactive' }}">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Galería de Medios
+                </a>
 
                 <!-- Secciones -->
                 <div x-data="{ open: {{ request()->routeIs('admin.sections.*') ? 'true' : 'false' }} }">
@@ -214,5 +232,8 @@
 
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Additional Scripts -->
+    @stack('scripts')
 </body>
 </html>

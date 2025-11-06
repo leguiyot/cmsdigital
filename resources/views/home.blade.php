@@ -1,5 +1,10 @@
 {{-- 
-    Vista principal del diario digital (Página de inicio)
+    Vista principal de    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <meta name="msapplication-TileImage" content="{{ asset('favicon.png') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    
+    <!-- Google Fonts - Montserrat -->rio digital (Página de inicio)
     
     Esta vista constituye la portada del sitio web del diario digital.
     Presenta los contenidos más relevantes organizados en diferentes secciones:
@@ -22,6 +27,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS Digital - Noticias y Actualidad</title>
     <meta name="description" content="Tu fuente confiable de noticias y actualidad. Mantente informado con las últimas noticias, deportes, política y más.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <meta name="msapplication-TileImage" content="{{ asset('favicon.png') }}">
+    <meta name="msapplication-TileColor" content="#ffffff")>
     
     <!-- Google Fonts - Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,65 +63,12 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Simple Icons for X (Twitter) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg">
-    
     <style>
         .gradient-overlay {
             background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
         }
         .breaking-news {
             animation: pulse 2s infinite;
-        }
-        /* Custom X icon */
-        .icon-x {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            background-image: url("data:image/svg+xml,%3Csvg role='img' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EX%3C/title%3E%3Cpath fill='%23000000' d='M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Custom Facebook icon */
-        .icon-facebook {
-            display: inline-block;
-            width: 22px;
-            height: 20px;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%231877f2' d='M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 3.667h-3.533v7.98H9.101z'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Social icons container */
-        .social-icons {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .social-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Custom Twitter icon */
-        .icon-twitter {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%231da1f2' d='M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
         }
     </style>
 </head>
@@ -119,26 +79,28 @@
             
 
             <!-- Main Header -->
-            <div class="py-6">
-                <div class="flex items-center justify-between mb-3 md:mb-1">
+            <div class="py-3">
+                <div class="flex items-center justify-between mb-2 md:mb-1">
                     <!-- Social Media Icons - Desktop -->
                     <div class="flex-1 hidden md:flex items-center">
-                        <div class="social-icons">
-                            <a href="#" class="social-icon hover:scale-125">
-                                <span class="icon-facebook"></span>
+                        <div class="flex items-center space-x-4">
+                            <a href="#" class="text-blue-600 hover:text-blue-700 transition-colors hover:scale-110 transform duration-200">
+                                <i class="fab fa-facebook-f text-xl"></i>
                             </a>
-                            <a href="#" class="social-icon hover:scale-125">
-                                <i class="fab fa-instagram text-pink-500" style="font-size: 20px;"></i>
+                            <a href="#" class="text-pink-500 hover:text-pink-600 transition-colors hover:scale-110 transform duration-200">
+                                <i class="fab fa-instagram text-xl"></i>
                             </a>
-                            <a href="#" class="social-icon hover:scale-125">
-                                <span class="icon-x"></span>
+                            <a href="#" class="text-gray-800 hover:text-gray-900 transition-colors hover:scale-110 transform duration-200">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
                             </a>
                         </div>
                     </div>
                     
                     <!-- Logo Principal -->
                     <div class="flex items-center flex-1 md:flex-none justify-center">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 md:h-32 lg:h-36 w-auto">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-24 md:h-28 lg:h-32 w-auto">
                     </div>
                     
                     <!-- Search Button - Desktop only -->
@@ -173,23 +135,25 @@
                 </div>
 
                 <!-- Social Media Icons - Mobile (below logo) -->
-                <div class="md:hidden flex justify-center mb-4">
-                    <div class="social-icons">
-                        <a href="#" class="social-icon hover:scale-125">
-                            <span class="icon-facebook"></span>
+                <div class="md:hidden flex justify-center mb-2">
+                    <div class="flex items-center space-x-4">
+                        <a href="#" class="text-blue-600 hover:text-blue-700 transition-colors hover:scale-110 transform duration-200">
+                            <i class="fab fa-facebook-f text-xl"></i>
                         </a>
-                        <a href="#" class="social-icon hover:scale-125">
-                            <i class="fab fa-instagram text-pink-500" style="font-size: 20px;"></i>
+                        <a href="#" class="text-pink-500 hover:text-pink-600 transition-colors hover:scale-110 transform duration-200">
+                            <i class="fab fa-instagram text-xl"></i>
                         </a>
-                        <a href="#" class="social-icon hover:scale-125">
-                            <span class="icon-x"></span>
+                        <a href="#" class="text-gray-800 hover:text-gray-900 transition-colors hover:scale-110 transform duration-200">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
                         </a>
                     </div>
                 </div>
             </div>
 
             <!-- Navigation -->
-            <nav class="py-3 border-t border-gray-200">
+            <nav class="py-2 border-t border-gray-200">
                 <div class="flex items-center justify-between">
                     <div class="hidden md:flex items-center justify-center space-x-8 flex-1">
                         @foreach($sections->whereNull('parent_id')->take(8) as $section)
@@ -245,7 +209,7 @@
         <!-- 1. BLOQUE PRINCIPAL: Artículo Destacado (Máxima Importancia) -->
         @if($featuredArticles->isNotEmpty())
         <section class="mb-8">
-            <div class="relative h-96 md:h-[500px] rounded-xl overflow-hidden shadow-2xl">
+            <div class="relative h-[450px] md:h-[600px] lg:h-[650px] rounded-xl overflow-hidden shadow-2xl">
                 <img src="{{ $featuredArticles->first()->getFeaturedImageUrl() ?: 'https://via.placeholder.com/1200x600?text=Noticia+Principal' }}" 
                      alt="{{ $featuredArticles->first()->title }}"
                      class="w-full h-full object-cover">
@@ -433,9 +397,11 @@
                                 <i class="fab fa-facebook-f mr-2"></i>
                                 <span class="text-sm font-medium">Facebook</span>
                             </a>
-                            <a href="#" class="flex items-center justify-center py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors">
-                                <i class="fab fa-twitter mr-2"></i>
-                                <span class="text-sm font-medium">Twitter</span>
+                            <a href="#" class="flex items-center justify-center py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                                <span class="text-sm font-medium">X</span>
                             </a>
                             <a href="#" class="flex items-center justify-center py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
                                 <i class="fab fa-instagram mr-2"></i>
@@ -500,8 +466,8 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mr-3">
-                        <h3 class="text-xl font-bold">CMS Digital</h3>
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-12 w-auto mr-3">
+                        
                     </div>
                     <p class="text-gray-300 text-sm mb-4">
                         Tu fuente confiable de noticias y actualidad. Mantente informado con contenido de calidad.
@@ -510,14 +476,16 @@
                         <a href="#" class="text-gray-400 hover:text-white">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white">
-                            <i class="fab fa-twitter"></i>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-white">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white">
-                            <i class="fab fa-youtube"></i>
+                        <a href="https://wa.me/34900123456" target="_blank" class="text-gray-400 hover:text-green-400 transition-colors">
+                            <i class="fab fa-whatsapp"></i>
                         </a>
                     </div>
                 </div>
@@ -557,13 +525,13 @@
                     <div class="text-sm text-gray-300 space-y-2">
                         <p><i class="fas fa-envelope mr-2"></i> contacto@cmsdigital.com</p>
                         <p><i class="fas fa-phone mr-2"></i> +34 900 123 456</p>
-                        <p><i class="fas fa-map-marker-alt mr-2"></i> Madrid, España</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> Mendoza , Argentina</p>
                     </div>
                 </div>
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p>&copy; {{ date('Y') }} CMS Digital. Todos los derechos reservados.</p>
+                <p>&copy; {{ date('Y') }} By Mara Web Desing. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>

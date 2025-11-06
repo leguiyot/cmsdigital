@@ -174,7 +174,9 @@ class ArticleController extends Controller
         $article = Article::where('slug', $slug)
                           ->published()
                           ->with(['author', 'section', 'comments' => function ($query) {
-                              $query->approved()->main()->with(['user', 'replies']);
+                              $query->approved()->whereNull('parent_id')->with(['user', 'replies' => function ($q) {
+                                  $q->approved()->with('user');
+                              }]);
                           }])
                           ->firstOrFail();
 

@@ -68,7 +68,7 @@ class Article extends Model implements HasMedia
 
     public function comments()
     {
-        return $this->hasMany(Comment::class)->where('status', 'approved');
+        return $this->hasMany(Comment::class)->approved();
     }
 
     public function allComments()

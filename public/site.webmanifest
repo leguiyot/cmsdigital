@@ -1,0 +1,21 @@
+{
+    "name": "CMS Digital",
+    "short_name": "CMS Digital",
+    "description": "Tu fuente confiable de noticias y actualidad",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4f46e5",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}

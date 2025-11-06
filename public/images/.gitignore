@@ -1,0 +1,7 @@
+# Mantener el directorio pero ignorar archivos temporales
+*.tmp
+*.cache
+
+# Mantener archivos importantes
+!logo.png
+!README.md
