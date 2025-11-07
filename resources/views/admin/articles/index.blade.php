@@ -91,10 +91,11 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Img</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Artículo
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-4 py-3 w-36 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Autor
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -114,6 +115,14 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($articles as $article)
                     <tr class="hover:bg-gray-50">
+                        <td class="px-3 py-4">
+                            @php $thumb = $article->getFeaturedImageUrl('thumb') ?? $article->getFeaturedImageUrl(); @endphp
+                            @if($thumb)
+                                <img src="{{ $thumb }}" alt="{{ $article->title }}" class="h-12 w-12 object-cover rounded-md border">
+                            @else
+                                <div class="h-12 w-12 bg-gray-100 rounded-md flex items-center justify-center text-xs text-gray-400 border">—</div>
+                            @endif
+                        </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 @if($article->is_featured)
@@ -121,18 +130,6 @@
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                     </svg>
                                 @endif
-                                
-                                {{-- Miniatura de la imagen destacada --}}
-                                @php $thumb = $article->getFeaturedImageUrl('thumb') ?? $article->getFeaturedImageUrl(); @endphp
-                                <div class="flex-shrink-0 mr-3">
-                                    @if($thumb)
-                                        <img src="{{ $thumb }}" alt="{{ $article->title }}" class="h-12 w-16 object-cover rounded-md border">
-                                    @else
-                                        <div class="h-12 w-16 bg-gray-100 rounded-md flex items-center justify-center text-xs text-gray-400 border">
-                                            Sin imagen
-                                        </div>
-                                    @endif
-                                </div>
 
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
@@ -144,8 +141,8 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $article->visible_author_name ?? 'Sin autor' }}
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 max-w-[9rem] overflow-hidden truncate">
+                            <div class="inline-block align-middle">{{ $article->visible_author_name ?? 'Sin autor' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $article->section->name ?? 'Sin sección' }}
@@ -175,42 +172,59 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex space-x-2">
-                                @if($article->status === 'published')
-                                    <a href="{{ route('articles.show', $article->slug) }}" target="_blank" 
-                                       class="text-green-600 hover:text-green-900">Ver</a>
-                                @endif
-                                <a href="{{ route('admin.articles.edit', $article) }}" 
-                                   class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                                <form method="POST" action="{{ route('admin.articles.destroy', $article) }}" 
-                                      class="inline" onsubmit="return confirm('¿Estás seguro de eliminar este artículo?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
-                                </form>
+                            <div class="grid grid-cols-3 gap-2 items-center">
+                                <div class="text-center">
+                                    @if($article->status === 'published')
+                                        <a href="{{ route('articles.show', $article->slug) }}" target="_blank" 
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 text-green-600 hover:text-green-900"
+                                           title="Ver" aria-label="Ver">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    @else
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded text-gray-300" title="Ver no disponible"> 
+                                            <i class="fas fa-eye"></i>
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-center">
+                                    <a href="{{ route('admin.articles.edit', $article) }}" 
+                                       class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 text-indigo-600 hover:text-indigo-900" title="Editar" aria-label="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                                <div class="text-center">
+                                    <form method="POST" action="{{ route('admin.articles.destroy', $article) }}" 
+                                          class="inline" onsubmit="return confirm('¿Estás seguro de eliminar este artículo?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 text-red-600 hover:text-red-900" title="Eliminar" aria-label="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No hay artículos</h3>
-                            <p class="mt-1 text-sm text-gray-500">Comienza creando un nuevo artículo.</p>
-                            <div class="mt-6">
-                                <a href="{{ route('admin.articles.create') }}" 
-                                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                    Nuevo Artículo
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                             </svg>
+                             <h3 class="mt-2 text-sm font-medium text-gray-900">No hay artículos</h3>
+                             <p class="mt-1 text-sm text-gray-500">Comienza creando un nuevo artículo.</p>
+                             <div class="mt-6">
+                                 <a href="{{ route('admin.articles.create') }}" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                     </svg>
+                                     Nuevo Artículo
+                                 </a>
+                             </div>
+                         </td>
+                     </tr>
+                 @endforelse
             </tbody>
         </table>
     </div>

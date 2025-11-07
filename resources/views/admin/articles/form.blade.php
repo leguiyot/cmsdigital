@@ -171,7 +171,11 @@
                         <img src="{{ $article->getFirstMediaUrl('cover', 'medium') }}" 
                              alt="Imagen destacada" 
                              class="w-full h-48 object-cover rounded-lg border border-gray-200">
-                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
+                            <button type="button" onclick="document.getElementById('featured_image').click();" 
+                                    class="bg-white hover:bg-gray-100 text-gray-900 px-3 py-1 rounded text-sm border border-gray-200">
+                                <i class="fas fa-pencil-alt mr-1"></i> Cambiar
+                            </button>
                             <button type="button" onclick="removeFeaturedImage()" 
                                     class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
                                 <i class="fas fa-trash mr-1"></i> Eliminar

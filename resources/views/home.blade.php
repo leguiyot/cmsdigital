@@ -302,7 +302,7 @@
                     </div>
                     
                     <div class="space-y-6">
-                        @foreach($latestNews->take(6) as $article)
+                        @foreach($latestNews->take(4) as $article)
                         <article class="flex bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                             <div class="w-1/3">
                                 <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/200x150?text=Noticia' }}" 
@@ -383,6 +383,101 @@
             </div>
         </section>
         @endif
+
+        <!-- SLIDER: Carrusel de Noticias -->
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-layer-group text-gray-700 mr-2"></i>
+                    Más noticias
+                </h2>
+                <div class="text-sm text-gray-500">Desliza para ver más</div>
+            </div>
+
+            <div x-data="{
+                     items: {{ $latestNews->skip(4)->take(8)->map(function($a){ return [
+                         'title' => $a->title,
+                         'excerpt' => Str::limit($a->excerpt, 200),
+                         'slug' => $a->slug,
+                         'cover' => $a->getFeaturedImageUrl() ?? null,
+                         'published_at' => $a->published_at->toDateTimeString(),
+                         'show_author_name' => (bool) $a->show_author_name,
+                         'author' => $a->author ? ['name' => $a->author->name] : null,
+                         'section' => $a->section ? ['name' => $a->section->name] : null,
+                     ]; })->values()->toJson() }},
+                     idx: 0,
+                     timer: null,
+                     resumeTimer: null,
+                     restartDelay: 15000, // reanuda auto-advance tras 15s de inactividad
+                     next() { if(this.items.length) this.idx = (this.idx + 1) % this.items.length },
+                     prev() { if(this.items.length) this.idx = (this.idx - 1 + this.items.length) % this.items.length },
+                     startAuto() {
+                         if(this.timer) return;
+                         this.timer = setInterval(() => { if(this.items.length) this.idx = (this.idx + 1) % this.items.length }, 10000)
+                     },
+                     stopAuto() {
+                         if(this.timer) { clearInterval(this.timer); this.timer = null }
+                         if(this.resumeTimer) { clearTimeout(this.resumeTimer); this.resumeTimer = null }
+                     },
+                     handleInteraction() {
+                         // Pausar inmediatamente y reanudar después de restartDelay de inactividad
+                         this.stopAuto();
+                         this.resumeTimer = setTimeout(() => { this.startAuto() }, this.restartDelay);
+                     }
+                }" x-init="startAuto()" @mouseenter="stopAuto()" @mouseleave="startAuto()" class="relative px-4 md:px-8">
+
+                <div class="relative h-56 md:h-72 lg:h-80 overflow-hidden">
+                    <template x-for="(item, i) in items" :key="i">
+                        <div class="absolute inset-0" x-show="i === idx"
+                             x-transition:enter="transition ease-out duration-700"
+                             x-transition:enter-start="opacity-0 transform translate-x-6 scale-95"
+                             x-transition:enter-end="opacity-100 transform translate-x-0 scale-100"
+                             x-transition:leave="transition ease-in duration-500"
+                             x-transition:leave-start="opacity-100 transform translate-x-0 scale-100"
+                             x-transition:leave-end="opacity-0 transform -translate-x-6 scale-95">
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden h-full">
+                                <div class="md:flex h-full">
+                                    <div class="md:w-1/3 h-full flex-shrink-0">
+                                        <img :src="item.cover ? item.cover : 'https://via.placeholder.com/600x400?text=Noticia'" class="w-full h-full object-cover" :alt="item.title">
+                                    </div>
+                                    <div class="p-6 md:w-2/3 h-full overflow-hidden">
+                                        <h3 class="font-bold text-xl mb-2 leading-tight" x-text="item.title"></h3>
+                                        <p class="text-gray-700 text-base mb-3" x-text="item.excerpt"></p>
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <span x-text="`Por ${item.show_author_name ? (item.author ? item.author.name : 'Ndi Diario Digital') : (item.section ? `Ndi Diario Digital - ${item.section.name}` : 'Ndi Diario Digital')}`"></span>
+                                            <span class="mx-2">•</span>
+                                            <span x-text="new Date(item.published_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })"></span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <a :href="`/articles/${item.slug}`" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Leer</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                 
+                 <!-- Controls -->
+                <div class="absolute inset-y-1/2 -left-6 md:-left-8 transform -translate-y-1/2 z-50">
+                    <button @click="prev(); handleInteraction()" class="p-2 bg-white rounded-full shadow-md hover:bg-gray-100">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                <div class="absolute inset-y-1/2 -right-6 md:-right-8 transform -translate-y-1/2 z-50">
+                    <button @click="next(); handleInteraction()" class="p-2 bg-white rounded-full shadow-md hover:bg-gray-100">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Dots -->
+                <div class="flex justify-center mt-4">
+                    <template x-for="(item, i) in items" :key="i">
+                        <button @click="idx = i; handleInteraction()" :class="{'bg-blue-600': i===idx, 'bg-gray-300': i!==idx }" class="h-2 w-6 mx-1 rounded-full"></button>
+                    </template>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
