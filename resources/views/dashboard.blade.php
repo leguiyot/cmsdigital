@@ -94,7 +94,7 @@
                                     <div class="flex-1">
                                         <h4 class="text-sm font-medium text-gray-900">{{ Str::limit($article->title, 50) }}</h4>
                                         <p class="text-xs text-gray-500">
-                                            Por {{ $article->author->name ?? 'Sin autor' }} • 
+                                            Por {{ $article->visible_author_name ?? 'Sin autor' }} • 
                                             {{ $article->created_at->diffForHumans() }}
                                         </p>
                                     </div>
@@ -103,7 +103,15 @@
                                         @elseif($article->status === 'draft') bg-yellow-100 text-yellow-800
                                         @elseif($article->status === 'review') bg-blue-100 text-blue-800
                                         @else bg-gray-100 text-gray-800 @endif">
-                                        {{ ucfirst($article->status) }}
+                                        @if($article->status === 'published')
+                                            Publicado
+                                        @elseif($article->status === 'draft')
+                                            Borrador
+                                        @elseif($article->status === 'review')
+                                            En Revisión
+                                        @else
+                                            {{ ucfirst($article->status) }}
+                                        @endif
                                     </span>
                                 </div>
                             @empty

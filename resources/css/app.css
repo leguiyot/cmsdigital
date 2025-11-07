@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --brand-color: #445D9A;
+  --brand-hover-color: #3b4f84; /* ligeramente más oscuro */
+  --brand-foreground: #ffffff;
+}

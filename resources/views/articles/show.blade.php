@@ -25,7 +25,7 @@
     <meta name="keywords" content="{{ is_array($article->meta_keywords) ? implode(', ', $article->meta_keywords) : $article->meta_keywords }}">
     @endif
     
-    <meta name="author" content="{{ $article->author->name }}">
+    <meta name="author" content="{{ $article->visible_author_name }}">
     <meta property="article:published_time" content="{{ $article->published_at->toISOString() }}">
     <meta property="article:section" content="{{ $article->section->name }}">
     
@@ -167,12 +167,11 @@
                 
                 <!-- Article Content -->
                 <div class="p-6 md:p-8">
-                    <!-- Section and Date -->
+                    <!-- Volanta and Date -->
                     <div class="flex items-center mb-4 text-sm">
-                        <a href="{{ route('sections.show', $article->section->slug) }}" 
-                           class="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors">
-                            {{ $article->section->name }}
-                        </a>
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full">
+                            {{ $article->volanta ?? $article->section->name }}
+                        </span>
                         <span class="ml-4 text-gray-500">
                             {{ $article->published_at->format('d \d\e F \d\e Y \a \l\a\s H:i') }}
                         </span>
@@ -192,10 +191,10 @@
                     <div class="flex items-center justify-between border-b border-gray-200 pb-6 mb-8">
                         <div class="flex items-center">
                             <img class="h-12 w-12 rounded-full" 
-                                 src="https://ui-avatars.com/api/?name={{ urlencode($article->author->name) }}&background=4f46e5&color=fff" 
-                                 alt="{{ $article->author->name }}">
+                                 src="https://ui-avatars.com/api/?name={{ urlencode($article->visible_author_name) }}&background=4f46e5&color=fff" 
+                                 alt="{{ $article->visible_author_name }}">
                             <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-900">{{ $article->author->name }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $article->visible_author_name }}</p>
                                 <p class="text-sm text-gray-500">Autor</p>
                             </div>
                         </div>

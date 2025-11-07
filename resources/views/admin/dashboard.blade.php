@@ -24,13 +24,13 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Dashboard')
+@section('title', 'Panel de Control')
 
 @section('content')
 <!-- Header con acciones rápidas -->
 <div class="flex justify-between items-center mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Panel de Control</h1>
         <p class="text-gray-600 mt-1">Resumen general del sistema y accesos rápidos</p>
     </div>
     <div class="flex space-x-3">
@@ -117,9 +117,9 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Recent Articles -->
-    <div class="bg-white rounded-lg shadow">
+    <div class="lg:col-span-2 bg-white rounded-lg shadow">
         <div class="p-6 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Artículos Recientes</h3>
         </div>
@@ -133,8 +133,16 @@
                                 <p class="text-sm text-gray-500">
                                     por {{ $article->author->name ?? 'Usuario' }} • {{ $article->created_at->diffForHumans() }}
                                 </p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $article->status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                    {{ ucfirst($article->status) }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $article->status === 'published' ? 'bg-green-100 text-green-800' : ($article->status === 'review' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                    @if($article->status === 'published')
+                                        Publicado
+                                    @elseif($article->status === 'draft')
+                                        Borrador
+                                    @elseif($article->status === 'review')
+                                        En Revisión
+                                    @else
+                                        {{ ucfirst($article->status) }}
+                                    @endif
                                 </span>
                             </div>
                             <div class="ml-4">
@@ -157,7 +165,7 @@
     </div>
 
     <!-- Top Articles -->
-    <div class="bg-white rounded-lg shadow">
+    <div class="lg:col-span-1 bg-white rounded-lg shadow">
         <div class="p-6 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Artículos Más Leídos</h3>
         </div>

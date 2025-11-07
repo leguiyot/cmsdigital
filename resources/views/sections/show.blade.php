@@ -163,16 +163,14 @@
                                 
                                 <!-- Contenido del artículo -->
                                 <div class="md:w-3/5 p-6">
-                                    <!-- Metadatos -->
-                                    <div class="flex items-center mb-3 text-sm text-gray-500">
-                                        <span>{{ $article->published_at->format('d/m/Y H:i') }}</span>
-                                        <span class="mx-2">•</span>
-                                        <span>Por {{ $article->author->name }}</span>
-                                        @if($article->reading_time)
-                                            <span class="mx-2">•</span>
-                                            <span>{{ $article->reading_time }} min de lectura</span>
-                                        @endif
+                                    <!-- Volanta -->
+                                    @if($article->volanta)
+                                    <div class="mb-2">
+                                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                            {{ $article->volanta }}
+                                        </span>
                                     </div>
+                                    @endif
                                     
                                     <!-- Título -->
                                     <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-3 leading-tight">
@@ -186,6 +184,17 @@
                                     <p class="text-gray-600 mb-4 line-clamp-3">
                                         {{ $article->excerpt }}
                                     </p>
+                                    
+                                    <!-- Metadatos -->
+                                    <div class="flex items-center mb-4 text-sm text-gray-500">
+                                        <span>{{ $article->published_at->format('d/m/Y H:i') }}</span>
+                                        <span class="mx-2">•</span>
+                                        <span>Por {{ $article->author->name }}</span>
+                                        @if($article->reading_time)
+                                            <span class="mx-2">•</span>
+                                            <span>{{ $article->reading_time }} min de lectura</span>
+                                        @endif
+                                    </div>
                                     
                                     <!-- Tags -->
                                     @if($article->tags && count($article->tags) > 0)

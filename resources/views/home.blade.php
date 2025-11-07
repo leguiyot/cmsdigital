@@ -25,7 +25,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMS Digital - Noticias y Actualidad</title>
+    <title>Ndi Diario Digital</title>
     <meta name="description" content="Tu fuente confiable de noticias y actualidad. Mantente informado con las últimas noticias, deportes, política y más.">
     
     <!-- Favicon -->
@@ -221,7 +221,7 @@
                                 <i class="fas fa-star mr-1"></i>
                                 DESTACADO
                             </span>
-                            <span class="text-blue-200">{{ $featuredArticles->first()->section->name }}</span>
+                            <span class="text-blue-200">{{ $featuredArticles->first()->volanta ?? $featuredArticles->first()->section->name }}</span>
                         </div>
                         <h1 class="text-3xl md:text-5xl font-bold mb-4 leading-tight">
                             <a href="{{ route('articles.show', $featuredArticles->first()->slug) }}" 
@@ -233,7 +233,7 @@
                             {{ $featuredArticles->first()->excerpt }}
                         </p>
                         <div class="flex items-center text-sm text-gray-300">
-                            <span>Por {{ $featuredArticles->first()->author->name }}</span>
+                            <span>Por {{ $featuredArticles->first()->visible_author_name }}</span>
                             <span class="mx-2">•</span>
                             <span>{{ $featuredArticles->first()->published_at->format('d/m/Y H:i') }}</span>
                         </div>
@@ -254,31 +254,31 @@
                 <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Ver todas →</a>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach($featuredArticles->skip(1)->take(4) as $article)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($featuredArticles->skip(1)->take(3) as $article)
                 <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                     <div class="relative">
-                        <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/400x250?text=Noticia' }}" 
+                        <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/600x350?text=Noticia' }}" 
                              alt="{{ $article->title }}"
-                             class="w-full h-48 object-cover">
+                             class="w-full h-56 object-cover">
                         <div class="absolute top-3 left-3">
                             <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                                {{ $article->section->name }}
+                                {{ $article->volanta ?? $article->section->name }}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-lg mb-2 leading-tight">
+                    <div class="p-5">
+                        <h3 class="font-bold text-xl mb-2 leading-tight">
                             <a href="{{ route('articles.show', $article->slug) }}" 
                                class="text-gray-900 hover:text-blue-600 transition-colors">
                                 {{ Str::limit($article->title, 80) }}
                             </a>
                         </h3>
-                        <p class="text-gray-600 text-sm mb-3">
-                            {{ Str::limit($article->excerpt, 120) }}
+                        <p class="text-gray-700 text-base mb-3">
+                            {{ Str::limit($article->excerpt, 140) }}
                         </p>
                         <div class="flex items-center justify-between text-xs text-gray-500">
-                            <span>{{ $article->author->name }}</span>
+                            <span>{{ $article->visible_author_name }}</span>
                             <span>{{ $article->published_at->format('d/m/Y H:i') }}</span>
                         </div>
                     </div>
@@ -312,7 +312,7 @@
                             <div class="w-2/3 p-4">
                                 <div class="flex items-center mb-2">
                                     <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium mr-2">
-                                        {{ $article->section->name }}
+                                        {{ $article->volanta ?? $article->section->name }}
                                     </span>
                                     <span class="text-xs text-gray-500">
                                         {{ $article->published_at->format('d/m/Y H:i') }}
@@ -328,7 +328,8 @@
                                     {{ Str::limit($article->excerpt, 150) }}
                                 </p>
                                 <div class="flex items-center justify-between text-xs text-gray-500">
-                                    <span>Por {{ $article->author->name }}</span>
+                                    <span>{{ $article->visible_author_name }}</span>
+                                    <span>{{ $article->published_at->format('d/m/Y H:i') }}</span>
                                 </div>
                             </div>
                         </article>
@@ -337,83 +338,7 @@
                 </div>
 
                 <!-- Sidebar: Más Leídos y Trending -->
-                <div class="space-y-8">
-                    
-                    <!-- Más Leídos -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">
-                            <i class="fas fa-chart-line text-green-500 mr-2"></i>
-                            Más Leídos
-                        </h3>
-                        <div class="space-y-4">
-                            @foreach($mostRead->take(5) as $index => $article)
-                            <div class="flex items-start space-x-3">
-                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                    {{ $index + 1 }}
-                                </span>
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-sm leading-tight mb-1">
-                                        <a href="{{ route('articles.show', $article->slug) }}" 
-                                           class="text-gray-900 hover:text-blue-600 transition-colors">
-                                            {{ Str::limit($article->title, 80) }}
-                                        </a>
-                                    </h4>
-                                    <div class="text-xs text-gray-500">
-                                        {{ $article->views_count }} lecturas • {{ $article->published_at->format('d/m/Y H:i') }}
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Newsletter Signup -->
-                    <div class="bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg shadow-md p-6 text-white">
-                        <h3 class="text-xl font-bold mb-2">
-                            <i class="fas fa-envelope mr-2"></i>
-                            Mantente Informado
-                        </h3>
-                        <p class="text-blue-100 mb-4 text-sm">
-                            Recibe las noticias más importantes directamente en tu email.
-                        </p>
-                        <form class="space-y-3">
-                            <input type="email" placeholder="Tu email" 
-                                   class="w-full px-3 py-2 rounded text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-white">
-                            <button type="submit" 
-                                    class="w-full bg-white text-blue-600 py-2 rounded font-semibold text-sm hover:bg-gray-100 transition-colors">
-                                Suscribirse Gratis
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Social Media -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">
-                            <i class="fas fa-share-alt text-purple-500 mr-2"></i>
-                            Síguenos
-                        </h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <a href="#" class="flex items-center justify-center py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <i class="fab fa-facebook-f mr-2"></i>
-                                <span class="text-sm font-medium">Facebook</span>
-                            </a>
-                            <a href="#" class="flex items-center justify-center py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors">
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                                </svg>
-                                <span class="text-sm font-medium">X</span>
-                            </a>
-                            <a href="#" class="flex items-center justify-center py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
-                                <i class="fab fa-instagram mr-2"></i>
-                                <span class="text-sm font-medium">Instagram</span>
-                            </a>
-                            <a href="#" class="flex items-center justify-center py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                <i class="fab fa-youtube mr-2"></i>
-                                <span class="text-sm font-medium">YouTube</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <div class="lg:col-span-1"></div>
             </div>
         </section>
 
@@ -441,7 +366,7 @@
                                     </a>
                                 </h4>
                                 <div class="text-xs text-gray-500">
-                                    {{ $article->published_at->format('d/m/Y H:i') }} • {{ $article->author->name }}
+                                    {{ $article->published_at->format('d/m/Y H:i') }} • {{ $article->visible_author_name }}
                                 </div>
                             </article>
                             @endforeach
@@ -513,7 +438,7 @@
                         <li><a href="#" class="text-gray-300 hover:text-white">Términos de Uso</a></li>
                         <li><a href="#" class="text-gray-300 hover:text-white">Privacidad</a></li>
                         @auth
-                        <li><a href="{{ route('dashboard') }}" class="text-blue-400 hover:text-blue-300">Panel Admin</a></li>
+                        <li><a href="{{ route('dashboard') }}" class="text-blue-400 hover:text-blue-300">Panel de Control</a></li>
                         @else
                         <li><a href="{{ route('login') }}" class="text-blue-400 hover:text-blue-300">Iniciar Sesión</a></li>
                         @endauth

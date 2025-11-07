@@ -91,6 +91,7 @@ class ArticleController extends Controller
         // Validar todos los campos del formulario incluyendo imágenes
         $request->validate([
             'title' => 'required|string|max:255',
+            'volanta' => 'nullable|string|max:255',
             'excerpt' => 'required|string|max:500',
             'body' => 'required|string',
             'section_id' => 'required|exists:sections,id',
@@ -102,15 +103,19 @@ class ArticleController extends Controller
             'tags' => 'nullable|string',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',
+            'show_author_name' => 'boolean',
             'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB máximo
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
         ]);
 
         // Preparar datos básicos del artículo
         $articleData = $request->only([
-            'title', 'excerpt', 'body', 'section_id', 'status',
+            'title', 'volanta', 'excerpt', 'body', 'section_id', 'status',
             'seo_title', 'meta_description', 'is_featured', 'allow_comments'
         ]);
+
+        // Mostrar nombre del autor según checkbox
+        $articleData['show_author_name'] = $request->has('show_author_name') ? true : false;
 
         // Manejar fecha de publicación automática
         if ($request->status === 'published' && !$request->published_at) {
@@ -211,6 +216,7 @@ class ArticleController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'volanta' => 'nullable|string|max:255',
             'excerpt' => 'required|string|max:500',
             'body' => 'required|string',
             'section_id' => 'required|exists:sections,id',
@@ -222,6 +228,7 @@ class ArticleController extends Controller
             'tags' => 'nullable|string',
             'is_featured' => 'boolean',
             'allow_comments' => 'boolean',
+            'show_author_name' => 'boolean',
             'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB max
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
             'remove_featured_image' => 'nullable|boolean',
@@ -230,9 +237,12 @@ class ArticleController extends Controller
         ]);
 
         $articleData = $request->only([
-            'title', 'excerpt', 'body', 'section_id', 'status',
+            'title', 'volanta', 'excerpt', 'body', 'section_id', 'status',
             'seo_title', 'meta_description', 'is_featured', 'allow_comments'
         ]);
+
+        // Mostrar nombre del autor según checkbox
+        $articleData['show_author_name'] = $request->has('show_author_name') ? true : false;
 
         // Handle published_at
         if ($request->status === 'published' && !$article->published_at && !$request->published_at) {

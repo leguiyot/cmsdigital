@@ -1,7 +1,5 @@
 {{-- 
-    Formulario de creación y edición de artículos
-    
-    Esta vista maneja tanto la creación como la edición de artículos en el panel administrativo.
+    Formulario de creación y edición de artículos vista maneja tanto la creación como la edición de artículos en el panel administrativo.
     Incluye funcionalidades avanzadas:
     
     Campos principales:
@@ -67,6 +65,23 @@
                     @error('title')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                </div>
+
+                <!-- Volanta -->
+                <div class="mb-4">
+                    <label for="volanta" class="block text-sm font-medium text-gray-700 mb-2">
+                        Volanta o Antetítulo
+                    </label>
+                    <input type="text" id="volanta" name="volanta"
+                           value="{{ old('volanta', $article->volanta ?? '') }}"
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Ingresa la volanta o antetítulo (opcional)">
+                    @error('volanta')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-xs text-gray-500">
+                        La volanta es un texto breve que aparece antes del título principal. Si no se especifica, se mostrará el nombre de la sección.
+                    </p>
                 </div>
 
                 <!-- Excerpt -->
@@ -286,7 +301,7 @@
                                 Borrador
                             </option>
                             <option value="review" {{ old('status', $article->status ?? '') === 'review' ? 'selected' : '' }}>
-                                En Revisión
+                                En Revisión  
                             </option>
                             <option value="published" {{ old('status', $article->status ?? '') === 'published' ? 'selected' : '' }}>
                                 Publicado
@@ -369,6 +384,17 @@
                                 Permitir comentarios
                             </label>
                         </div>
+
+                        <div class="flex items-center mt-2">
+                            <input type="checkbox" id="show_author_name" name="show_author_name" value="1"
+                                   {{ old('show_author_name', isset($article) ? ($article->show_author_name ?? true) : true) ? 'checked' : '' }}
+                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <label for="show_author_name" class="ml-2 text-sm text-gray-700">
+                                Mostrar el nombre del autor
+                            </label>
+                        </div>
+
+                        <p class="mt-1 text-xs text-gray-500">Si está deshabilitado, el autor se mostrará como "Ndi Diario Digital" en la web pública.</p>
                     </div>
                 </div>
             </div>

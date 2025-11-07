@@ -16,6 +16,7 @@ class Article extends Model implements HasMedia
 
     protected $fillable = [
         'title',
+        'volanta',
         'slug',
         'excerpt',
         'body',
@@ -33,6 +34,7 @@ class Article extends Model implements HasMedia
         'allow_comments',
         'views_count',
         'reading_time',
+        'show_author_name',
     ];
 
     protected function casts(): array
@@ -46,6 +48,7 @@ class Article extends Model implements HasMedia
             'allow_comments' => 'boolean',
             'views_count' => 'integer',
             'reading_time' => 'integer',
+            'show_author_name' => 'boolean',
         ];
     }
 
@@ -164,5 +167,16 @@ class Article extends Model implements HasMedia
             ->height(600)
             ->optimize()
             ->nonQueued();
+    }
+
+    public function getVisibleAuthorNameAttribute(): string
+    {
+        // Si el autor no debe mostrarse, devolvemos "Ndi Diario Digital - {Sección}" cuando exista sección
+        if (!$this->show_author_name) {
+            $sectionName = $this->section ? $this->section->name : null;
+            return $sectionName ? "Ndi Diario Digital - {$sectionName}" : 'Ndi Diario Digital';
+        }
+
+        return $this->author ? $this->author->name : 'Ndi Diario Digital';
     }
 }

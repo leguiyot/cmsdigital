@@ -132,7 +132,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $article->author->name ?? 'Sin autor' }}
+                            {{ $article->visible_author_name ?? 'Sin autor' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $article->section->name ?? 'Sin sección' }}
@@ -143,7 +143,15 @@
                                 @elseif($article->status === 'draft') bg-yellow-100 text-yellow-800
                                 @elseif($article->status === 'review') bg-blue-100 text-blue-800
                                 @else bg-gray-100 text-gray-800 @endif">
-                                {{ ucfirst($article->status) }}
+                                @if($article->status === 'published')
+                                    Publicado
+                                @elseif($article->status === 'draft')
+                                    Borrador
+                                @elseif($article->status === 'review')
+                                    En Revisión
+                                @else
+                                    {{ ucfirst($article->status) }}
+                                @endif
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
