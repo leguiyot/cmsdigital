@@ -148,7 +148,7 @@ class ArticleController extends Controller
         // Crear el artículo
         $article = Article::create($articleData);
 
-        // Manejar subida de imagen destacada
+        // Manejar imagen destacada
         if ($request->hasFile('featured_image')) {
             $article->addMediaFromRequest('featured_image')
                     ->toMediaCollection('cover');
@@ -233,7 +233,7 @@ class ArticleController extends Controller
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
             'remove_featured_image' => 'nullable|boolean',
             'remove_gallery_images' => 'nullable|array',
-            'remove_gallery_images.*' => 'nullable|integer',
+            'remove_gallery_images.*' => 'nullable|integer|exists:media,id',
         ]);
 
         $articleData = $request->only([
@@ -288,7 +288,7 @@ class ArticleController extends Controller
             $article->clearMediaCollection('cover');
         }
 
-        // Handle featured image upload
+        // Handle featured image
         if ($request->hasFile('featured_image')) {
             $article->clearMediaCollection('cover'); // Remove old image first
             $article->addMediaFromRequest('featured_image')

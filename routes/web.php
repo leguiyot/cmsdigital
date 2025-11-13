@@ -12,6 +12,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/articulos/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 Route::get('/seccion/{slug}', [SectionController::class, 'show'])->name('sections.show');
 
+// API pública para galería de medios (temporal - para desarrollo)
+Route::get('api/media', [App\Http\Controllers\MediaGalleryController::class, 'api'])->name('api.media.public');
+
 // Rutas administrativas (requieren autenticación)
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard principal

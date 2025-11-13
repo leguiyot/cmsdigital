@@ -17,7 +17,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $section->seo_title ?: $section->name }} - CMS Digital</title>
+    <title>{{ $section->seo_title ?: $section->name }} - Ndi</title>
     <meta name="description" content="{{ $section->meta_description ?: $section->description }}">
     
     @if($section->meta_keywords)
@@ -127,9 +127,7 @@
                 <div class="flex items-center justify-center">
                     <div class="text-center">
                         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ $section->name }}</h1>
-                        @if($section->description)
-                            <p class="text-gray-600 max-w-2xl mx-auto">{{ $section->description }}</p>
-                        @endif
+                       
                     </div>
                 </div>
             </nav>
@@ -215,13 +213,7 @@
                                             <i class="fas fa-arrow-right ml-2 text-sm"></i>
                                         </a>
                                         
-                                        <!-- Estadísticas -->
-                                        <div class="flex items-center space-x-4 text-gray-400 text-sm">
-                                            <span>
-                                                <i class="fas fa-eye mr-1"></i>
-                                                {{ $article->views_count }}
-                                            </span>
-                                        </div>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -229,45 +221,7 @@
                     @endforeach
                 </div>
 
-                <!-- Sidebar -->
-                <div class="space-y-8">
-                    <!-- Navegación de Secciones -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">
-                            <i class="fas fa-list text-blue-500 mr-2"></i>
-                            Todas las Secciones
-                        </h3>
-                        <div class="space-y-2">
-                            @php
-                                $allSections = \App\Models\Section::where('is_active', true)->orderBy('name')->get();
-                            @endphp
-                            @foreach($allSections->take(8) as $sectionItem)
-                                <a href="{{ route('sections.show', $sectionItem->slug) }}" 
-                                   class="block py-2 px-3 rounded transition-colors {{ $sectionItem->id === $section->id ? 'bg-blue-100 text-blue-800 font-medium' : 'text-gray-700 hover:bg-gray-100' }}">
-                                    {{ $sectionItem->name }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Newsletter Signup -->
-                    <div class="bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg shadow-md p-6 text-white">
-                        <h3 class="text-xl font-bold mb-2">
-                            <i class="fas fa-envelope mr-2"></i>
-                            Mantente Informado
-                        </h3>
-                        <p class="text-blue-100 mb-4 text-sm">
-                            Recibe las noticias más importantes de {{ $section->name }} directamente en tu email.
-                        </p>
-                        <form class="space-y-3">
-                            <input type="email" placeholder="Tu email" 
-                                   class="w-full px-3 py-2 rounded text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-white">
-                            <button type="submit" 
-                                    class="w-full bg-white text-blue-600 py-2 rounded font-semibold text-sm hover:bg-gray-100 transition-colors">
-                                Suscribirse Gratis
-                            </button>
-                        </form>
-                    </div>
+                
 
                     <!-- Más Artículos -->
                     @php

@@ -342,7 +342,7 @@
             </div>
         </section>
 
-        <!-- 4. BLOQUE POR SECCIONES: Contenido Categorizado (Media Importancia) -->
+        <!-- 4. BLOQUE POR SECCIONES: Contenido Categorizado (Media Importancia) 
         @if($latestBySection && count($latestBySection) > 0)
         <section class="mb-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -382,7 +382,7 @@
                 @endforeach
             </div>
         </section>
-        @endif
+        @endif-->
 
         <!-- SLIDER: Carrusel de Noticias -->
         <section class="mb-8">
@@ -449,7 +449,7 @@
                                             <span x-text="new Date(item.published_at).toLocaleString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })"></span>
                                         </div>
                                         <div class="mt-4">
-                                            <a :href="`/articles/${item.slug}`" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Leer</a>
+                                            <a :href="`/articulos/${item.slug}`" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Leer</a>
                                         </div>
                                     </div>
                                 </div>

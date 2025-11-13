@@ -1,0 +1,387 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\CustomMedia;
+use App\Models\MediaItem;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+
+/**
+ * Controlador especializado para la gestión de videos
+ * Maneja upload, conversiones, thumbnails y previews automáticos
+ */
+class VideoController extends Controller
+{
+    /**
+     * Muestra la lista de videos subidos
+     */
+    public function index(Request $request)
+    {
+        $query = CustomMedia::where('mime_type', 'like', 'video/%');
+        
+        // Filtros opcionales
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('file_name', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+        
+        $videos = $query->orderBy('created_at', 'desc')->paginate(12);
+        
+        // Estadísticas
+        $stats = [
+            'total_videos' => CustomMedia::where('mime_type', 'like', 'video/%')->count(),
+            'total_size' => CustomMedia::where('mime_type', 'like', 'video/%')->sum('size'),
+            'recent_uploads' => CustomMedia::where('mime_type', 'like', 'video/%')
+                ->where('created_at', '>=', now()->subDays(7))->count()
+        ];
+        
+        return view('admin.videos.index', compact('videos', 'stats'));
+    }
+
+    /**
+     * Formulario para subir videos
+     */
+    public function create()
+    {
+        return view('admin.videos.create');
+    }
+
+    /**
+     * Procesa la subida de videos y genera previews automáticamente
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'videos' => 'required|array|max:5', // Máximo 5 videos por lote
+            'videos.*' => 'file|mimes:mp4,avi,mov,wmv,flv,webm|max:51200', // 50MB máximo
+            'generate_preview' => 'boolean',
+            'preview_duration' => 'integer|min:1|max:10'
+        ]);
+
+        $uploadedVideos = [];
+        $errors = [];
+        $generatePreview = $request->boolean('generate_preview', true);
+        $previewDuration = $request->input('preview_duration', 3);
+
+        foreach ($request->file('videos') as $videoFile) {
+            try {
+                // Crear MediaItem para el video
+                $mediaItem = new MediaItem();
+                $mediaItem->name = pathinfo($videoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $mediaItem->description = $request->input('description');
+                $mediaItem->is_gallery_item = true;
+                $mediaItem->save();
+
+                // Subir video usando Spatie Media Library
+                $media = $mediaItem->addMediaFromRequest('videos')
+                    ->each(function ($fileAdder) {
+                        $fileAdder->toMediaCollection('videos');
+                    });
+
+                // Obtener el archivo media creado
+                $videoMedia = $mediaItem->getFirstMedia('videos');
+                
+                if ($videoMedia) {
+            // Generar conversiones automáticamente si FFmpeg está disponible
+            try {
+                $this->generateVideoConversions($videoMedia, $generatePreview, $previewDuration);
+            } catch (\Exception $e) {
+                Log::warning('No se pudieron generar conversiones de video', [
+                    'video_id' => $videoMedia->id,
+                    'error' => $e->getMessage()
+                ]);
+            }                    // Obtener metadatos del video
+                    $metadata = $this->extractVideoMetadata($videoMedia);
+                    
+                    // Guardar metadatos como propiedades personalizadas
+                    $videoMedia->setCustomProperty('duration', $metadata['duration'] ?? null);
+                    $videoMedia->setCustomProperty('resolution', $metadata['resolution'] ?? null);
+                    $videoMedia->setCustomProperty('has_preview', $generatePreview);
+                    $videoMedia->save();
+
+                    $uploadedVideos[] = [
+                        'id' => $videoMedia->id,
+                        'name' => $videoMedia->file_name,
+                        'url' => $videoMedia->getUrl(),
+                        'thumbnail_url' => $videoMedia->hasGeneratedConversion('video_thumb') 
+                            ? $videoMedia->getUrl('video_thumb') 
+                            : null,
+                        'preview_url' => $generatePreview && $videoMedia->hasGeneratedConversion('video_preview') 
+                            ? $videoMedia->getUrl('video_preview') 
+                            : null,
+                        'size' => $this->formatFileSize($videoMedia->size),
+                        'duration' => $metadata['duration'] ?? 'Desconocida'
+                    ];
+                }
+
+            } catch (\Exception $e) {
+                $errors[] = "Error procesando {$videoFile->getClientOriginalName()}: " . $e->getMessage();
+                Log::error('Video upload error', [
+                    'file' => $videoFile->getClientOriginalName(),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        }
+
+        $response = [
+            'success' => count($uploadedVideos) > 0,
+            'uploaded' => $uploadedVideos,
+            'errors' => $errors,
+            'message' => count($uploadedVideos) > 0 
+                ? sprintf('Se subieron %d video(s) exitosamente', count($uploadedVideos))
+                : 'No se pudieron subir los videos'
+        ];
+
+        if ($request->expectsJson()) {
+            return response()->json($response);
+        }
+
+        if (count($uploadedVideos) > 0) {
+            return redirect()->route('admin.videos.index')
+                ->with('success', $response['message']);
+        } else {
+            return redirect()->back()
+                ->with('error', 'No se pudieron subir los videos')
+                ->withErrors($errors);
+        }
+    }
+
+    /**
+     * Muestra detalles de un video específico
+     */
+    public function show($id)
+    {
+        $video = CustomMedia::where('mime_type', 'like', 'video/%')->findOrFail($id);
+        
+        // Obtener URLs de conversiones si existen
+        $thumbnailUrl = $video->hasGeneratedConversion('video_thumb') 
+            ? $video->getUrl('video_thumb') 
+            : null;
+            
+        $previewUrl = $video->hasGeneratedConversion('video_preview') 
+            ? $video->getUrl('video_preview') 
+            : null;
+
+        return view('admin.videos.show', compact('video', 'thumbnailUrl', 'previewUrl'));
+    }
+
+    /**
+     * Elimina un video y sus conversiones
+     */
+    public function destroy($id)
+    {
+        try {
+            $video = CustomMedia::where('mime_type', 'like', 'video/%')->findOrFail($id);
+            $fileName = $video->file_name;
+            
+            // Eliminar archivo y conversiones
+            $video->delete();
+            
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Video '{$fileName}' eliminado exitosamente"
+                ]);
+            }
+            
+            return redirect()->route('admin.videos.index')
+                ->with('success', "Video '{$fileName}' eliminado exitosamente");
+                
+        } catch (\Exception $e) {
+            Log::error('Error deleting video', [
+                'video_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al eliminar el video'
+                ], 500);
+            }
+            
+            return redirect()->route('admin.videos.index')
+                ->with('error', 'Error al eliminar el video');
+        }
+    }
+
+    /**
+     * Regenera las conversiones de un video
+     */
+    public function regenerateConversions($id)
+    {
+        try {
+            $video = CustomMedia::where('mime_type', 'like', 'video/%')->findOrFail($id);
+            
+            // Eliminar conversiones existentes
+            $video->clearMediaConversions('video_thumb');
+            $video->clearMediaConversions('video_preview');
+            
+            // Regenerar conversiones
+            $this->generateVideoConversions($video, true, 3);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Conversiones regeneradas exitosamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al regenerar conversiones: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API endpoint para obtener videos
+     */
+    public function api(Request $request)
+    {
+        $query = CustomMedia::where('mime_type', 'like', 'video/%');
+        
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('file_name', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+        
+        $videos = $query->orderBy('created_at', 'desc')
+                       ->paginate($request->get('per_page', 12));
+        
+        $formattedVideos = $videos->map(function ($video) {
+            return [
+                'id' => $video->id,
+                'name' => $video->file_name,
+                'url' => $video->getUrl(),
+                'thumbnail_url' => $video->hasGeneratedConversion('video_thumb') 
+                    ? $video->getUrl('video_thumb') 
+                    : null,
+                'preview_url' => $video->hasGeneratedConversion('video_preview') 
+                    ? $video->getUrl('video_preview') 
+                    : null,
+                'mime_type' => $video->mime_type,
+                'size' => $this->formatFileSize($video->size),
+                'duration' => $video->getCustomProperty('duration', 'Desconocida'),
+                'resolution' => $video->getCustomProperty('resolution', 'Desconocida'),
+                'created_at' => $video->created_at->format('d/m/Y H:i')
+            ];
+        });
+        
+        return response()->json([
+            'data' => $formattedVideos,
+            'current_page' => $videos->currentPage(),
+            'last_page' => $videos->lastPage(),
+            'total' => $videos->total()
+        ]);
+    }
+
+    /**
+     * Genera conversiones automáticas para videos
+     */
+    private function generateVideoConversions($media, $generatePreview = true, $previewDuration = 3)
+    {
+        try {
+            // Esta funcionalidad se manejará a través de las conversiones de Spatie
+            // Las conversiones se definen en el modelo
+            
+            // Forzar la generación de conversiones
+            $media->registerMediaConversions();
+            
+        } catch (\Exception $e) {
+            Log::error('Error generating video conversions', [
+                'media_id' => $media->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Extrae metadatos del video usando FFProbe
+     */
+    private function extractVideoMetadata($media)
+    {
+        try {
+            $videoPath = $media->getPath();
+            
+            // Usar FFProbe para obtener metadatos
+            $ffprobe = \FFMpeg\FFProbe::create([
+                'ffmpeg.binaries'  => config('media-library.ffmpeg_path'),
+                'ffprobe.binaries' => config('media-library.ffprobe_path')
+            ]);
+            
+            $duration = $ffprobe
+                ->format($videoPath)
+                ->get('duration');
+                
+            $video = $ffprobe
+                ->streams($videoPath)
+                ->videos()
+                ->first();
+                
+            $width = $video->get('width');
+            $height = $video->get('height');
+            
+            return [
+                'duration' => $this->formatDuration($duration),
+                'resolution' => $width && $height ? "{$width}x{$height}" : null,
+                'raw_duration' => $duration
+            ];
+            
+        } catch (\Exception $e) {
+            Log::warning('Could not extract video metadata', [
+                'media_id' => $media->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'duration' => null,
+                'resolution' => null,
+                'raw_duration' => null
+            ];
+        }
+    }
+
+    /**
+     * Formatea la duración en formato legible
+     */
+    private function formatDuration($seconds)
+    {
+        if (!$seconds) return null;
+        
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $seconds = $seconds % 60;
+        
+        if ($hours > 0) {
+            return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        } else {
+            return sprintf('%02d:%02d', $minutes, $seconds);
+        }
+    }
+
+    /**
+     * Formatea el tamaño del archivo
+     */
+    private function formatFileSize($bytes)
+    {
+        if ($bytes >= 1073741824) {
+            return number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            return number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            return number_format($bytes / 1024, 2) . ' KB';
+        } else {
+            return $bytes . ' bytes';
+        }
+    }
+}

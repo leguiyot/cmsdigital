@@ -18,13 +18,13 @@ class CustomMedia extends Media
         
         static::creating(function ($media) {
             if (empty($media->disk)) {
-                $media->disk = config('media-library.disk_name', 'uploads');
+                $media->disk = config('media-library.disk_name', 'public');
             }
         });
         
         static::updating(function ($media) {
             if (empty($media->disk)) {
-                $media->disk = config('media-library.disk_name', 'uploads');
+                $media->disk = config('media-library.disk_name', 'public');
             }
         });
     }
@@ -34,11 +34,11 @@ class CustomMedia extends Media
      */
     public function getDisk(): string
     {
-        $disk = $this->disk ?: config('media-library.disk_name', 'uploads');
+        $disk = $this->disk ?: config('media-library.disk_name', 'public');
         
         if (empty($disk)) {
             // Fallback si todo falla
-            $disk = 'uploads';
+            $disk = 'public';
         }
         
         return $disk;
@@ -64,10 +64,10 @@ class CustomMedia extends Media
             $filename = $this->file_name;
             if (!empty($conversionName)) {
                 $filename = pathinfo($this->file_name, PATHINFO_FILENAME) . '-' . $conversionName . '.' . pathinfo($this->file_name, PATHINFO_EXTENSION);
-                return $host . "/uploads/articles/{$collection}/{$year}/{$month}/conversions/{$conversionName}/{$filename}";
+                return $host . "/storage/articles/{$collection}/{$year}/{$month}/conversions/{$conversionName}/{$filename}";
             }
             
-            return $host . "/uploads/articles/{$collection}/{$year}/{$month}/{$filename}";
+            return $host . "/storage/articles/{$collection}/{$year}/{$month}/{$filename}";
         }
     }
 }

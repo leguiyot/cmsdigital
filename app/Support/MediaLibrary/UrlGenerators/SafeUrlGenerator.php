@@ -18,12 +18,12 @@ class SafeUrlGenerator extends DefaultUrlGenerator
         
         // Si disk es null o vacío, usar el disco por defecto
         if (empty($disk)) {
-            $disk = config('media-library.disk_name', 'uploads');
+            $disk = config('media-library.disk_name', 'public');
         }
         
-        // Si todavía es null, usar uploads como fallback final
+        // Si todavía es null, usar public como fallback final
         if (empty($disk)) {
-            $disk = 'uploads';
+            $disk = 'public';
         }
         
         return $disk;
@@ -44,7 +44,7 @@ class SafeUrlGenerator extends DefaultUrlGenerator
             $collection = $this->media->collection_name ?: 'default';
             
             $host = request() ? request()->getSchemeAndHttpHost() : config('app.url');
-            return $host . "/uploads/articles/{$collection}/{$year}/{$month}/{$this->media->file_name}";
+            return $host . "/storage/articles/{$collection}/{$year}/{$month}/{$this->media->file_name}";
         }
     }
 }
