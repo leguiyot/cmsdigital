@@ -7,6 +7,7 @@ use App\Models\Section;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -24,24 +25,29 @@ class ArticleController extends Controller
      * Muestra la lista de artículos con filtros de búsqueda
      * Permite filtrar por: texto, estado y sección
      * 
+     * OPTIMIZADO: Eager loading mejorado para evitar consultas N+1
+     * 
      * @param Request $request - Parámetros de filtrado
      * @return \Illuminate\View\View - Vista con lista paginada de artículos
      */
     public function index(Request $request)
     {
-        // Construir consulta base con relaciones necesarias
-        $query = Article::with(['author', 'section']);
+        // Construir consulta base con relaciones necesarias (eager loading optimizado)
+        $query = Article::with([
+            'author:id,name,email',
+            'section:id,name,slug'
+        ]);
 
         // Aplicar filtro por búsqueda de texto en múltiples campos
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
-                  ->orWhere('excerpt', 'like', "%{$searchTerm}%")
-                  ->orWhere('body', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('author', function ($authorQuery) use ($searchTerm) {
-                      $authorQuery->where('name', 'like', "%{$searchTerm}%");
-                  });
+                    ->orWhere('excerpt', 'like', "%{$searchTerm}%")
+                    ->orWhere('body', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('author', function ($authorQuery) use ($searchTerm) {
+                        $authorQuery->where('name', 'like', "%{$searchTerm}%");
+                    });
             });
         }
 
@@ -60,9 +66,11 @@ class ArticleController extends Controller
 
         // Paginar resultados y mantener parámetros de búsqueda
         $articles = $query->paginate(15)->withQueryString();
-        
-        // Obtener secciones activas para el filtro
-        $sections = Section::active()->orderBy('name')->get();
+
+        // Obtener secciones activas para el filtro (con caché de 30 minutos)
+        $sections = cache()->remember('admin.sections_filter', 1800, function () {
+            return Section::active()->orderBy('name')->get(['id', 'name']);
+        });
 
         return view('admin.articles.index', compact('articles', 'sections'));
     }
@@ -106,12 +114,21 @@ class ArticleController extends Controller
             'show_author_name' => 'boolean',
             'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB máximo
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
+            'article_videos.*' => 'nullable|mimes:mp4,mov,avi,webm|max:40960', // 40MB máximo por video
         ]);
 
         // Preparar datos básicos del artículo
         $articleData = $request->only([
-            'title', 'volanta', 'excerpt', 'body', 'section_id', 'status',
-            'seo_title', 'meta_description', 'is_featured', 'allow_comments'
+            'title',
+            'volanta',
+            'excerpt',
+            'body',
+            'section_id',
+            'status',
+            'seo_title',
+            'meta_description',
+            'is_featured',
+            'allow_comments'
         ]);
 
         // Mostrar nombre del autor según checkbox
@@ -151,44 +168,76 @@ class ArticleController extends Controller
         // Manejar imagen destacada
         if ($request->hasFile('featured_image')) {
             $article->addMediaFromRequest('featured_image')
-                    ->toMediaCollection('cover');
+                ->toMediaCollection('cover');
         }
 
         // Manejar subida de imágenes de galería
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $file) {
                 $article->addMedia($file)
-                        ->toMediaCollection('gallery');
+                    ->toMediaCollection('gallery');
+            }
+        }
+
+        // Manejar subida de videos
+        if ($request->hasFile('article_videos')) {
+            foreach ($request->file('article_videos') as $file) {
+                $article->addMedia($file)
+                    ->withCustomProperties([
+                        'is_video' => true,
+                        'generate_preview' => true,
+                        'preview_duration' => 3,
+                    ])
+                    ->toMediaCollection('videos');
             }
         }
 
         return redirect()->route('admin.articles.index')
-                        ->with('success', 'Artículo creado exitosamente.');
+            ->with('success', 'Artículo creado exitosamente.');
     }
 
     /**
      * Muestra un artículo específico en la vista pública
-     * Incrementa el contador de vistas
+     * Incrementa el contador de vistas de forma asíncrona
+     * 
+     * OPTIMIZADO: Implementa caché de artículos publicados (60 minutos)
      * 
      * @param string $slug - Slug único del artículo
      * @return \Illuminate\View\View - Vista del artículo público
      */
     public function show(string $slug)
     {
-        // Obtener artículo publicado con relaciones necesarias
-        $article = Article::where('slug', $slug)
-                          ->published()
-                          ->with(['author', 'section', 'comments' => function ($query) {
-                              $query->approved()->whereNull('parent_id')->with(['user', 'replies' => function ($q) {
-                                  $q->approved()->with('user');
-                              }]);
-                          }])
-                          ->firstOrFail();
+        // Obtener artículo publicado con relaciones necesarias y caché
+        $article = cache()->remember("article.{$slug}", 3600, function () use ($slug) {
+            return Article::where('slug', $slug)
+                ->published()
+                ->with([
+                    'author:id,name,email,bio',
+                    'section:id,name,slug',
+                    'media'
+                ])
+                ->firstOrFail();
+        });
 
-        // Incrementar contador de vistas del artículo
-        $article->incrementViews();
+        // Obtener comentarios sin caché (pueden cambiar frecuentemente)
+        $comments = $article->comments()
+            ->approved()
+            ->whereNull('parent_id')
+            ->with([
+                'user:id,name',
+                'replies' => function ($q) {
+                    $q->approved()->with('user:id,name');
+                }
+            ])
+            ->latest()
+            ->get();
 
-        return view('articles.show', compact('article'));
+        // Incrementar contador de vistas de forma asíncrona (no bloquea la respuesta)
+        dispatch(function () use ($article) {
+            $article->incrementViews();
+        })->afterResponse();
+
+        return view('articles.show', compact('article', 'comments'));
     }
 
     /**
@@ -214,6 +263,13 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article)
     {
+        Log::info('UPDATE METHOD STARTED', [
+            'article_id' => $article->id,
+            'request_method' => $request->method(),
+            'has_remove_videos' => $request->has('remove_videos'),
+            'remove_videos_raw' => $request->get('remove_videos')
+        ]);
+
         $request->validate([
             'title' => 'required|string|max:255',
             'volanta' => 'nullable|string|max:255',
@@ -231,14 +287,24 @@ class ArticleController extends Controller
             'show_author_name' => 'boolean',
             'featured_image' => 'nullable|image|mimes:jpeg,png,webp|max:10240', // 10MB max
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,webp|max:10240',
+            'article_videos.*' => 'nullable|mimes:mp4,mov,avi,webm|max:40960', // 40MB máximo por video
             'remove_featured_image' => 'nullable|boolean',
             'remove_gallery_images' => 'nullable|array',
             'remove_gallery_images.*' => 'nullable|integer|exists:media,id',
+            'remove_videos' => 'nullable|string',
         ]);
 
         $articleData = $request->only([
-            'title', 'volanta', 'excerpt', 'body', 'section_id', 'status',
-            'seo_title', 'meta_description', 'is_featured', 'allow_comments'
+            'title',
+            'volanta',
+            'excerpt',
+            'body',
+            'section_id',
+            'status',
+            'seo_title',
+            'meta_description',
+            'is_featured',
+            'allow_comments'
         ]);
 
         // Mostrar nombre del autor según checkbox
@@ -281,19 +347,20 @@ class ArticleController extends Controller
         $wordCount = str_word_count(strip_tags($request->body));
         $articleData['reading_time'] = max(1, ceil($wordCount / 200));
 
-        $article->update($articleData);
-
-        // Handle featured image removal
-        if ($request->has('remove_featured_image') && $request->remove_featured_image) {
+        // Handle featured image removal FIRST (before updating article data)
+        if ($request->boolean('remove_featured_image')) {
             $article->clearMediaCollection('cover');
         }
 
-        // Handle featured image
+        // Handle featured image upload
         if ($request->hasFile('featured_image')) {
             $article->clearMediaCollection('cover'); // Remove old image first
             $article->addMediaFromRequest('featured_image')
-                    ->toMediaCollection('cover');
+                ->toMediaCollection('cover');
         }
+
+        // Update article data after handling media
+        $article->update($articleData);
 
         // Handle gallery images removal
         if ($request->has('remove_gallery_images')) {
@@ -309,12 +376,49 @@ class ArticleController extends Controller
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $file) {
                 $article->addMedia($file)
-                        ->toMediaCollection('gallery');
+                    ->toMediaCollection('gallery');
+            }
+        }
+
+        // Handle video removal - DEBUG
+        \Log::info('Video removal debug', [
+            'has_remove_videos' => $request->has('remove_videos'),
+            'remove_videos_data' => $request->get('remove_videos'),
+            'all_request_data' => $request->all()
+        ]);
+
+        if ($request->filled('remove_videos')) {
+            $videoIds = explode(',', $request->remove_videos);
+            $videoIds = array_filter(array_map('trim', $videoIds)); // Limpiar espacios
+
+            foreach ($videoIds as $mediaId) {
+                \Log::info('Attempting to remove video', ['media_id' => $mediaId]);
+                $media = $article->getMedia('videos')->where('id', $mediaId)->first();
+                if ($media) {
+                    \Log::info('Video found, deleting', ['media_id' => $mediaId, 'file_name' => $media->file_name]);
+                    $media->delete();
+                    \Log::info('Video deleted successfully', ['media_id' => $mediaId]);
+                } else {
+                    \Log::warning('Video not found for deletion', ['media_id' => $mediaId]);
+                }
+            }
+        }
+
+        // Handle new video uploads
+        if ($request->hasFile('article_videos')) {
+            foreach ($request->file('article_videos') as $file) {
+                $article->addMedia($file)
+                    ->withCustomProperties([
+                        'is_video' => true,
+                        'generate_preview' => true,
+                        'preview_duration' => 3,
+                    ])
+                    ->toMediaCollection('videos');
             }
         }
 
         return redirect()->route('admin.articles.index')
-                        ->with('success', 'Artículo actualizado exitosamente.');
+            ->with('success', 'Artículo actualizado exitosamente.');
     }
 
     /**
@@ -330,7 +434,7 @@ class ArticleController extends Controller
         $article->delete();
 
         return redirect()->route('admin.articles.index')
-                        ->with('success', 'Artículo eliminado exitosamente.');
+            ->with('success', 'Artículo eliminado exitosamente.');
     }
 
     /**
@@ -374,14 +478,14 @@ class ArticleController extends Controller
     {
         // Preparar datos de actualización
         $updateData = ['is_featured' => !$article->is_featured];
-        
+
         // Si se está marcando como destacado, actualizar timestamp
         if (!$article->is_featured) {
             $updateData['featured_at'] = now();
         } else {
             $updateData['featured_at'] = null;
         }
-        
+
         $article->update($updateData);
 
         // Mensaje dinámico según la acción realizada

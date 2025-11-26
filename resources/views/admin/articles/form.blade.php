@@ -28,8 +28,14 @@
 @section('title', isset($article) ? 'Editar Artículo' : 'Nuevo Artículo')
 
 @push('styles')
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Font Awesome - Carga diferida para mejor rendimiento -->
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+@endpush
+
+@push('scripts')
+<!-- JavaScript del formulario - Carga diferida -->
+<script src="{{ asset('js/article-form.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -176,11 +182,18 @@
                                     class="bg-white hover:bg-gray-100 text-gray-900 px-3 py-1 rounded text-sm border border-gray-200">
                                 <i class="fas fa-pencil-alt mr-1"></i> Cambiar
                             </button>
-                            <button type="button" onclick="removeFeaturedImage()" 
-                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
-                                <i class="fas fa-trash mr-1"></i> Eliminar
-                            </button>
                         </div>
+                    </div>
+                    
+                    <!-- Checkbox para eliminar imagen -->
+                    <div class="mt-3">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="remove_featured_image" value="1" 
+                                   class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-600">
+                                <i class="fas fa-trash text-red-500 mr-1"></i> Eliminar imagen destacada
+                            </span>
+                        </label>
                     </div>
                 </div>
                 @endif
@@ -286,6 +299,101 @@
                 <div id="gallery_preview" class="mt-4 hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nuevas Imágenes</label>
                     <div id="gallery_preview_container" class="grid grid-cols-2 gap-3"></div>
+                </div>
+            </div>
+
+            <!-- Videos Section -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Videos del Artículo</h3>
+                
+                <!-- Current Videos (for editing) -->
+                @if(isset($article) && $article->getMedia('videos')->count() > 0)
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Videos Actuales</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach($article->getMedia('videos') as $media)
+                        <div class="relative group border border-gray-200 rounded-lg p-3" data-video-id="{{ $media->id }}">
+                            <div class="aspect-video bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                                <video class="w-full h-full object-cover rounded-lg" controls>
+                                    <source src="{{ $media->getUrl() }}" type="{{ $media->mime_type }}">
+                                    Tu navegador no soporta videos.
+                                </video>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs text-gray-600">
+                                    <p class="font-medium">{{ $media->file_name }}</p>
+                                    <p>{{ number_format($media->size / (1024*1024), 2) }} MB</p>
+                                </div>
+                                <button type="button" onclick="removeVideo({{ $media->id }})" 
+                                        class="bg-red-600 hover:bg-red-700 text-white p-1 rounded text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- Upload Videos -->
+                <div>
+                    <label for="article_videos" class="block text-sm font-medium text-gray-700 mb-2">
+                        Agregar Videos
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" 
+                         onclick="document.getElementById('article_videos').click()">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>                                    
+                            </svg>
+                            <div class="text-xs text-gray-600">
+                                <span class="font-medium text-blue-600 hover:text-blue-500">Subir videos</span>
+                                <p class="pl-1">o arrastra y suelta</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                MP4, MOV, AVI, WEBM hasta 40MB cada uno
+                            </p>
+                        </div>
+                    </div>
+                    <input id="article_videos" name="article_videos[]" type="file" class="hidden" 
+                           accept="video/mp4,video/mov,video/avi,video/webm" multiple onchange="previewVideos(this)">
+                    @error('article_videos')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error('article_videos.*')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Video Preview -->
+                <div id="video_preview" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nuevos Videos - Vista Previa</label>
+                    <div id="video_preview_container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-blue-800">
+                                Consejos para videos:
+                            </h4>
+                            <div class="mt-1 text-sm text-blue-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Formatos soportados: MP4, MOV, AVI, WEBM</li>
+                                    <li>Tamaño máximo: 40MB por video</li>
+                                    <li>Los videos se pueden insertar en el contenido del artículo</li>
+                                    <li>Se generarán thumbnails automáticamente (si está disponible FFmpeg)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -434,6 +542,7 @@
             <!-- Actions -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="space-y-3">
+
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
                         {{ isset($article) ? 'Actualizar Artículo' : 'Crear Artículo' }}
                     </button>
@@ -473,205 +582,5 @@
     </div>
 </form>
 
-<!-- Enhanced Text Editor with Image Management -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-resize textareas
-    const textareas = document.querySelectorAll('textarea');
-    textareas.forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
-        });
-    });
-
-    // Character counter for excerpt
-    const excerpt = document.getElementById('excerpt');
-    const excerptCounter = document.createElement('div');
-    excerptCounter.className = 'text-xs text-gray-500 mt-1 text-right';
-    excerpt.parentNode.appendChild(excerptCounter);
-
-    function updateExcerptCounter() {
-        const length = excerpt.value.length;
-        excerptCounter.textContent = `${length}/500 caracteres`;
-        excerptCounter.className = length > 500 ? 'text-xs text-red-500 mt-1 text-right' : 'text-xs text-gray-500 mt-1 text-right';
-    }
-
-    excerpt.addEventListener('input', updateExcerptCounter);
-    updateExcerptCounter();
-
-    // Character counter for meta description
-    const metaDesc = document.getElementById('meta_description');
-    if (metaDesc) {
-        const metaDescCounter = document.createElement('div');
-        metaDescCounter.className = 'text-xs text-gray-500 mt-1 text-right';
-        metaDesc.parentNode.appendChild(metaDescCounter);
-
-        function updateMetaDescCounter() {
-            const length = metaDesc.value.length;
-            metaDescCounter.textContent = `${length}/160 caracteres`;
-            metaDescCounter.className = length > 160 ? 'text-xs text-red-500 mt-1 text-right' : 'text-xs text-gray-500 mt-1 text-right';
-        }
-
-        metaDesc.addEventListener('input', updateMetaDescCounter);
-        updateMetaDescCounter();
-    }
-});
-
-// Featured Image Functions
-function previewFeaturedImage(input) {
-    const preview = document.getElementById('featured_image_preview');
-    const previewImg = document.getElementById('featured_image_preview_img');
-    
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            preview.classList.remove('hidden');
-        }
-        
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-function clearFeaturedImagePreview() {
-    const input = document.getElementById('featured_image');
-    const preview = document.getElementById('featured_image_preview');
-    
-    input.value = '';
-    preview.classList.add('hidden');
-}
-
-function removeFeaturedImage() {
-    if (confirm('¿Estás seguro de que quieres eliminar la imagen destacada?')) {
-        // Add a hidden input to mark for deletion
-        const form = document.querySelector('form');
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'remove_featured_image';
-        hiddenInput.value = '1';
-        form.appendChild(hiddenInput);
-        
-        // Hide the current image
-        const currentImageContainer = event.target.closest('.relative.group').parentElement;
-        currentImageContainer.style.display = 'none';
-    }
-}
-
-// Gallery Images Functions
-function previewGalleryImages(input) {
-    const preview = document.getElementById('gallery_preview');
-    const container = document.getElementById('gallery_preview_container');
-    
-    // Clear previous previews
-    container.innerHTML = '';
-    
-    if (input.files && input.files.length > 0) {
-        preview.classList.remove('hidden');
-        
-        Array.from(input.files).forEach((file, index) => {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const imgContainer = document.createElement('div');
-                imgContainer.className = 'relative';
-                
-                imgContainer.innerHTML = `
-                    <img src="${e.target.result}" alt="Vista previa ${index + 1}" 
-                         class="w-full h-20 object-cover rounded border border-gray-200">
-                    <button type="button" onclick="removeGalleryPreview(this, ${index})" 
-                            class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                `;
-                
-                container.appendChild(imgContainer);
-            }
-            
-            reader.readAsDataURL(file);
-        });
-    } else {
-        preview.classList.add('hidden');
-    }
-}
-
-function removeGalleryPreview(button, index) {
-    const input = document.getElementById('gallery_images');
-    const container = document.getElementById('gallery_preview_container');
-    const preview = document.getElementById('gallery_preview');
-    
-    // Remove the preview element
-    button.parentElement.remove();
-    
-    // Create new FileList without the removed file
-    const dt = new DataTransfer();
-    const files = Array.from(input.files);
-    
-    files.forEach((file, i) => {
-        if (i !== index) {
-            dt.items.add(file);
-        }
-    });
-    
-    input.files = dt.files;
-    
-    // Hide preview if no files left
-    if (input.files.length === 0) {
-        preview.classList.add('hidden');
-    }
-}
-
-function removeGalleryImage(mediaId) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
-        // Add hidden input to mark for deletion
-        const form = document.querySelector('form');
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'remove_gallery_images[]';
-        hiddenInput.value = mediaId;
-        form.appendChild(hiddenInput);
-        
-        // Hide the image
-        event.target.closest('.relative.group').style.display = 'none';
-    }
-}
-
-// Drag and Drop functionality
-function setupDragAndDrop() {
-    const dropZones = document.querySelectorAll('[onclick*="click()"]');
-    
-    dropZones.forEach(zone => {
-        zone.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.classList.add('border-blue-500', 'bg-blue-50');
-        });
-        
-        zone.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.classList.remove('border-blue-500', 'bg-blue-50');
-        });
-        
-        zone.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('border-blue-500', 'bg-blue-50');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const input = this.parentElement.querySelector('input[type="file"]');
-                input.files = files;
-                
-                // Trigger change event
-                const event = new Event('change', { bubbles: true });
-                input.dispatchEvent(event);
-            }
-        });
-    });
-}
-
-// Initialize drag and drop when page loads
-document.addEventListener('DOMContentLoaded', setupDragAndDrop);
-</script>
 @endsection
+    

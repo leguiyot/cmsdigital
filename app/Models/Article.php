@@ -152,6 +152,9 @@ class Article extends Model implements HasMedia
 
         $this->addMediaCollection('gallery')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        $this->addMediaCollection('videos')
+            ->acceptsMimeTypes(['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm']);
     }
 
     public function registerMediaConversions(Media $media = null): void

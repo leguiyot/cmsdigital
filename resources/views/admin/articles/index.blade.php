@@ -116,9 +116,22 @@
                 @forelse($articles as $article)
                     <tr class="hover:bg-gray-50">
                         <td class="px-3 py-4">
-                            @php $thumb = $article->getFeaturedImageUrl('thumb') ?? $article->getFeaturedImageUrl(); @endphp
+                            @php 
+                                $thumb = $article->getFeaturedImageUrl('thumb') ?? $article->getFeaturedImageUrl(); 
+                                $hasVideos = $article->getMedia('videos')->count() > 0;
+                                $firstVideo = $hasVideos ? $article->getMedia('videos')->first() : null;
+                            @endphp
                             @if($thumb)
                                 <img src="{{ $thumb }}" alt="{{ $article->title }}" class="h-12 w-12 object-cover rounded-md border">
+                            @elseif($hasVideos && $firstVideo)
+                                <div class="relative h-12 w-12 bg-gray-800 rounded-md flex items-center justify-center border">
+                                    <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M8 5v10l8-5-8-5z"/>
+                                    </svg>
+                                    <div class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                                        {{ $article->getMedia('videos')->count() }}
+                                    </div>
+                                </div>
                             @else
                                 <div class="h-12 w-12 bg-gray-100 rounded-md flex items-center justify-center text-xs text-gray-400 border">—</div>
                             @endif

@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Laravel ya proporciona automáticamente la variable $errors a todas las vistas
-        // No es necesario compartirla manualmente
+        // Registrar observer para invalidación automática de caché
+        \App\Models\Article::observe(\App\Observers\ArticleObserver::class);
     }
 }
