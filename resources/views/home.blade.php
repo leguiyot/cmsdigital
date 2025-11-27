@@ -280,8 +280,26 @@ Datos recibidos del HomeController:
                     @foreach($featuredArticles->skip(1)->take(3) as $article)
                         <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                             <div class="relative">
-                                <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/600x350?text=Noticia' }}"
-                                    alt="{{ $article->title }}" class="w-full h-56 object-cover">
+                                @if($article->getFirstMediaUrl('cover'))
+                                    <img src="{{ $article->getFirstMediaUrl('cover', 'medium') }}"
+                                        alt="{{ $article->title }}" class="w-full h-56 object-cover">
+                                @elseif($article->getFirstMediaUrl('videos'))
+                                    <div class="w-full h-56 bg-black flex items-center justify-center overflow-hidden relative group">
+                                        <video class="w-full h-full object-cover" preload="metadata" muted loop onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;">
+                                            <source src="{{ $article->getFirstMediaUrl('videos') }}" type="{{ $article->getFirstMedia('videos')->mime_type }}">
+                                        </video>
+                                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                                            <div class="bg-black bg-opacity-50 rounded-full p-3">
+                                                <i class="fas fa-play text-white text-2xl"></i>
+                                            </div>
+                                        </div>
+                                        <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                                            <i class="fas fa-video mr-1"></i> Video
+                                        </div>
+                                    </div>
+                                @else
+                                    <img src="https://via.placeholder.com/600x350?text=Noticia" alt="{{ $article->title }}" class="w-full h-56 object-cover">
+                                @endif
                                 <div class="absolute top-3 left-3">
                                     <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">
                                         {{ $article->volanta ?? $article->section->name }}
@@ -327,8 +345,23 @@ Datos recibidos del HomeController:
                             <article
                                 class="flex bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                                 <div class="w-1/3">
-                                    <img src="{{ $article->getFeaturedImageUrl() ?: 'https://via.placeholder.com/200x150?text=Noticia' }}"
-                                        alt="{{ $article->title }}" class="w-full h-32 object-cover">
+                                    @if($article->getFirstMediaUrl('cover'))
+                                        <img src="{{ $article->getFirstMediaUrl('cover', 'thumb') }}"
+                                            alt="{{ $article->title }}" class="w-full h-32 object-cover">
+                                    @elseif($article->getFirstMediaUrl('videos'))
+                                        <div class="w-full h-32 bg-black flex items-center justify-center overflow-hidden relative group">
+                                            <video class="w-full h-full object-cover" preload="metadata" muted loop onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;">
+                                                <source src="{{ $article->getFirstMediaUrl('videos') }}" type="{{ $article->getFirstMedia('videos')->mime_type }}">
+                                            </video>
+                                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                                                <div class="bg-black bg-opacity-50 rounded-full p-2">
+                                                    <i class="fas fa-play text-white text-sm"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <img src="https://via.placeholder.com/200x150?text=Noticia" alt="{{ $article->title }}" class="w-full h-32 object-cover">
+                                    @endif
                                 </div>
                                 <div class="w-2/3 p-4">
                                     <div class="flex items-center mb-2">
