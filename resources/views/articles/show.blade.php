@@ -258,7 +258,8 @@ Datos recibidos del ArticleController:
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 @foreach($article->getMedia('videos') as $video)
                                     <div class="bg-gray-100 rounded-lg overflow-hidden">
-                                        <video controls class="w-full h-64 object-cover">
+                                        <video controls class="w-full h-64 object-cover" preload="metadata"
+                                            poster="{{ $article->getFirstMediaUrl('cover') }}">
                                             <source src="{{ $video->getUrl() }}" type="{{ $video->mime_type }}">
                                             <p class="p-4 text-gray-600">
                                                 Tu navegador no soporta la reproducción de video.
@@ -441,16 +442,16 @@ Datos recibidos del ArticleController:
         </div>
     </div>
 
-    
+
     <script>
         // Auto-hide header on scroll
         let lastScrollTop = 0;
         const header = document.getElementById('mainHeader');
         const scrollThreshold = 100; // Pixels to scroll before hiding
-        
-        window.addEventListener('scroll', function() {
+
+        window.addEventListener('scroll', function () {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
+
             if (scrollTop > scrollThreshold) {
                 if (scrollTop > lastScrollTop) {
                     // Scrolling down - hide header with slide up effect
@@ -463,50 +464,50 @@ Datos recibidos del ArticleController:
                 // At top of page - always show header
                 header.style.transform = 'translateY(0)';
             }
-            
+
             lastScrollTop = scrollTop;
         });
-        
+
         function shareOnFacebook() {
             const url = encodeURIComponent(window.location.href);
             const title = encodeURIComponent('{{ $article->title }}');
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
         }
-        
+
         function shareOnTwitter() {
             const url = encodeURIComponent(window.location.href);
             const text = encodeURIComponent('{{ $article->title }}');
             window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
         }
-        
+
         function copyToClipboard() {
-            navigator.clipboard.writeText(window.location.href).then(function() {
+            navigator.clipboard.writeText(window.location.href).then(function () {
                 alert('Enlace copiado al portapapeles');
-            }, function(err) {
+            }, function (err) {
                 console.error('Error al copiar: ', err);
             });
         }
-        
+
         function openImageModal(imageUrl, caption) {
             const modal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
             const modalCaption = document.getElementById('modalCaption');
-            
+
             modalImage.src = imageUrl;
             modalImage.alt = caption;
             modalCaption.textContent = caption;
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
-        
+
         function closeImageModal() {
             const modal = document.getElementById('imageModal');
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
-        
+
         // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 closeImageModal();
             }

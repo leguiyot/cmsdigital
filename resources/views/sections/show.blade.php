@@ -150,6 +150,20 @@
                                         <img src="{{ $article->getFirstMediaUrl('cover', 'medium') }}" 
                                              alt="{{ $article->title }}"
                                              class="w-full h-56 md:h-full object-cover">
+                                    @elseif($article->getFirstMediaUrl('videos'))
+                                        <div class="w-full h-56 md:h-full bg-black flex items-center justify-center overflow-hidden relative group">
+                                            <video class="w-full h-full object-cover" preload="metadata" muted loop onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;">
+                                                <source src="{{ $article->getFirstMediaUrl('videos') }}" type="{{ $article->getFirstMedia('videos')->mime_type }}">
+                                            </video>
+                                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                                                <div class="bg-black bg-opacity-50 rounded-full p-3">
+                                                    <i class="fas fa-play text-white text-2xl"></i>
+                                                </div>
+                                            </div>
+                                            <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                                                <i class="fas fa-video mr-1"></i> Video
+                                            </div>
+                                        </div>
                                     @else
                                         <div class="w-full h-56 md:h-full bg-gray-200 flex items-center justify-center">
                                             <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
