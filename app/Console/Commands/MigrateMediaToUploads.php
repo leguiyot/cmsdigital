@@ -98,9 +98,24 @@ class MigrateMediaToUploads extends Command
         $month = $date->format('m');
         $collection = $media->collection_name;
         
-        // Ruta antigua (storage)
-        $oldPath = storage_path("app/public/{$media->id}/{$media->file_name}");
-        
+        // Construir varias rutas candidatas en storage donde el archivo podría estar
+        $candidates = [
+            storage_path("app/public/{$media->id}/{$media->file_name}"),
+            storage_path("app/public/{$media->file_name}"),
+            storage_path("app/public/{$media->model_type}/{$media->model_id}/{$media->file_name}"),
+            storage_path("app/public/{$media->model_id}/{$media->file_name}"),
+            storage_path("app/public/{$collection}/{$year}/{$month}/{$media->file_name}"),
+            storage_path("app/public/articles/{$collection}/{$year}/{$month}/{$media->file_name}"),
+        ];
+
+        $oldPath = null;
+        foreach ($candidates as $cand) {
+            if (File::exists($cand)) {
+                $oldPath = $cand;
+                break;
+            }
+        }
+
         // Nueva ruta (uploads)
         $newDir = public_path("uploads/articles/{$collection}/{$year}/{$month}");
         $newPath = "{$newDir}/{$media->file_name}";
@@ -111,8 +126,8 @@ class MigrateMediaToUploads extends Command
             // Crear directorio si no existe
             File::ensureDirectoryExists($newDir);
             
-            // Copiar archivo si existe
-            if (File::exists($oldPath)) {
+            // Copiar archivo si existe en alguna ruta candidata
+            if ($oldPath && File::exists($oldPath)) {
                 File::copy($oldPath, $newPath);
                 
                 // Actualizar registro en base de datos
@@ -120,9 +135,9 @@ class MigrateMediaToUploads extends Command
                     'disk' => 'uploads',
                 ]);
                 
-                $this->line("   ✅ Copiado y actualizado en DB");
+                $this->line("   ✅ Copiado desde: {$oldPath} y actualizado en DB");
             } else {
-                $this->line("   ⚠️  Archivo original no encontrado en storage");
+                $this->line("   ⚠️  Archivo original no encontrado en storage (candidatos probados)");
             }
         }
     }

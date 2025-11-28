@@ -7,6 +7,11 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
 
+// Ruta proxy para servir/publicar archivos desde storage cuando no se puede crear storage:link
+Route::get('/storage/{path}', [\App\Http\Controllers\StorageProxyController::class, 'show'])
+    ->where('path', '.*')
+    ->name('storage.proxy');
+
 // Rutas públicas
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/articulos/{slug}', [ArticleController::class, 'show'])->name('articles.show');
@@ -14,6 +19,33 @@ Route::get('/seccion/{slug}', [SectionController::class, 'show'])->name('section
 
 // API pública para galería de medios (temporal - para desarrollo)
 Route::get('api/media', [App\Http\Controllers\MediaGalleryController::class, 'api'])->name('api.media.public');
+
+// ========== RUTAS DE PRUEBA IMAGE SERVER (DEV) ==========
+// DELETE THESE ROUTES IN PRODUCTION
+if (app()->environment(['local', 'testing'])) {
+    // Simulador local del Image Server (para desarrollo sin hosting externo)
+    // Excluir de CSRF para desarrollo
+    Route::post('/imageserver/upload.php', [\App\Http\Controllers\ImageServerSimulatorController::class, 'upload'])
+        ->withoutMiddleware('web');
+    Route::get('/imageserver/upload.php', [\App\Http\Controllers\ImageServerSimulatorController::class, 'info']);
+
+    // Página de test
+    Route::get('/test-imageserver', function () {
+        return view('test.imageserver');
+    })->name('test.imageserver');
+
+    Route::post('/test-imageserver/upload', function (\Illuminate\Http\Request $request) {
+        $request->validate(['file' => 'required|file']);
+        
+        try {
+            $imageServer = new \App\Services\ImageServerClient();
+            $response = $imageServer->upload($request->file('file'));
+            return response()->json(['success' => true, 'data' => $response], 201);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    })->name('test.imageserver.upload');
+}
 
 // Rutas administrativas (requieren autenticación)
 Route::middleware(['auth', 'verified'])->group(function () {

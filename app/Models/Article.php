@@ -147,13 +147,16 @@ class Article extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('cover')
+            ->useDisk('uploads')
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
 
         $this->addMediaCollection('gallery')
+            ->useDisk('uploads')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
 
         $this->addMediaCollection('videos')
+            ->useDisk('uploads')
             ->acceptsMimeTypes(['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm']);
     }
 

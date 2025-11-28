@@ -1,0 +1,3 @@
+2025-11-27 16:05:16 - UPLOAD_DENIED - {"ip":"127.0.0.1","reason":"Invalid API key"}
+2025-11-27 16:05:49 - UPLOAD_SUCCESS - {"file":"test-image.png","size":1649,"path":"uploads\/2025\/11\/8a5ba69a97442937.png","ip":"127.0.0.1"}
+2025-11-27 16:06:37 - UPLOAD_SUCCESS - {"file":"test-image.png","size":1649,"path":"uploads\/2025\/11\/0a87a221c326e335.png","ip":"127.0.0.1"}

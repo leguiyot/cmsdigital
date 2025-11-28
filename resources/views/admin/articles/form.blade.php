@@ -28,14 +28,8 @@
 @section('title', isset($article) ? 'Editar Artículo' : 'Nuevo Artículo')
 
 @push('styles')
-<!-- Font Awesome - Carga diferida para mejor rendimiento -->
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-@endpush
-
-@push('scripts')
-<!-- JavaScript del formulario - Carga diferida -->
-<script src="{{ asset('js/article-form.js') }}" defer></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @endpush
 
 @section('content')
@@ -178,22 +172,19 @@
                              alt="Imagen destacada" 
                              class="w-full h-48 object-cover rounded-lg border border-gray-200">
                         <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
+                            <button type="button" onclick="openImageGallery()" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-images mr-1"></i> Galería
+                            </button>
                             <button type="button" onclick="document.getElementById('featured_image').click();" 
                                     class="bg-white hover:bg-gray-100 text-gray-900 px-3 py-1 rounded text-sm border border-gray-200">
-                                <i class="fas fa-pencil-alt mr-1"></i> Cambiar
+                                <i class="fas fa-upload mr-1"></i> Subir
+                            </button>
+                            <button type="button" onclick="removeFeaturedImage()" 
+                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-trash mr-1"></i> Eliminar
                             </button>
                         </div>
-                    </div>
-                    
-                    <!-- Checkbox para eliminar imagen -->
-                    <div class="mt-3">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="remove_featured_image" value="1" 
-                                   class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-600">
-                                <i class="fas fa-trash text-red-500 mr-1"></i> Eliminar imagen destacada
-                            </span>
-                        </label>
                     </div>
                 </div>
                 @endif
@@ -203,21 +194,34 @@
                     <label for="featured_image" class="block text-sm font-medium text-gray-700 mb-2">
                         {{ isset($article) && $article->getFirstMediaUrl('cover') ? 'Cambiar Imagen' : 'Subir Imagen Destacada' }}
                     </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" 
-                         onclick="document.getElementById('featured_image').click()">
-                        <div class="space-y-1 text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="flex text-sm text-gray-600">
-                                <span class="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                    Subir archivo
-                                </span>
-                                <p class="pl-1">o arrastra y suelta</p>
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
+                            <button type="button" onclick="openImageGallery()" 
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md text-sm font-medium">
+                                <i class="fas fa-images mr-2"></i> Elegir de Galería
+                            </button>
+                            <button type="button" onclick="document.getElementById('featured_image').click();" 
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-md text-sm font-medium">
+                                <i class="fas fa-upload mr-2"></i> Subir Nueva
+                            </button>
+                        </div>
+                        
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" 
+                             onclick="document.getElementById('featured_image').click()">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <span class="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                                        Subir archivo
+                                    </span>
+                                    <p class="pl-1">o arrastra y suelta</p>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    PNG, JPG, WEBP hasta 10MB
+                                </p>
                             </div>
-                            <p class="text-xs text-gray-500">
-                                PNG, JPG, WEBP hasta 10MB
-                            </p>
                         </div>
                     </div>
                     <input id="featured_image" name="featured_image" type="file" class="hidden" 
@@ -299,101 +303,6 @@
                 <div id="gallery_preview" class="mt-4 hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nuevas Imágenes</label>
                     <div id="gallery_preview_container" class="grid grid-cols-2 gap-3"></div>
-                </div>
-            </div>
-
-            <!-- Videos Section -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Videos del Artículo</h3>
-                
-                <!-- Current Videos (for editing) -->
-                @if(isset($article) && $article->getMedia('videos')->count() > 0)
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Videos Actuales</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($article->getMedia('videos') as $media)
-                        <div class="relative group border border-gray-200 rounded-lg p-3" data-video-id="{{ $media->id }}">
-                            <div class="aspect-video bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
-                                <video class="w-full h-full object-cover rounded-lg" controls>
-                                    <source src="{{ $media->getUrl() }}" type="{{ $media->mime_type }}">
-                                    Tu navegador no soporta videos.
-                                </video>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="text-xs text-gray-600">
-                                    <p class="font-medium">{{ $media->file_name }}</p>
-                                    <p>{{ number_format($media->size / (1024*1024), 2) }} MB</p>
-                                </div>
-                                <button type="button" onclick="removeVideo({{ $media->id }})" 
-                                        class="bg-red-600 hover:bg-red-700 text-white p-1 rounded text-xs">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <!-- Upload Videos -->
-                <div>
-                    <label for="article_videos" class="block text-sm font-medium text-gray-700 mb-2">
-                        Agregar Videos
-                    </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors" 
-                         onclick="document.getElementById('article_videos').click()">
-                        <div class="space-y-1 text-center">
-                            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>                                    
-                            </svg>
-                            <div class="text-xs text-gray-600">
-                                <span class="font-medium text-blue-600 hover:text-blue-500">Subir videos</span>
-                                <p class="pl-1">o arrastra y suelta</p>
-                            </div>
-                            <p class="text-xs text-gray-500">
-                                MP4, MOV, AVI, WEBM hasta 40MB cada uno
-                            </p>
-                        </div>
-                    </div>
-                    <input id="article_videos" name="article_videos[]" type="file" class="hidden" 
-                           accept="video/mp4,video/mov,video/avi,video/webm" multiple onchange="previewVideos(this)">
-                    @error('article_videos')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                    @error('article_videos.*')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Video Preview -->
-                <div id="video_preview" class="mt-4 hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nuevos Videos - Vista Previa</label>
-                    <div id="video_preview_container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-
-                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h4 class="text-sm font-medium text-blue-800">
-                                Consejos para videos:
-                            </h4>
-                            <div class="mt-1 text-sm text-blue-700">
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>Formatos soportados: MP4, MOV, AVI, WEBM</li>
-                                    <li>Tamaño máximo: 40MB por video</li>
-                                    <li>Los videos se pueden insertar en el contenido del artículo</li>
-                                    <li>Se generarán thumbnails automáticamente (si está disponible FFmpeg)</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -542,7 +451,6 @@
             <!-- Actions -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="space-y-3">
-
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
                         {{ isset($article) ? 'Actualizar Artículo' : 'Crear Artículo' }}
                     </button>
@@ -582,5 +490,732 @@
     </div>
 </form>
 
-@endsection
+<!-- Enhanced Text Editor with Image Management -->
+<script>
+// Image Gallery Modal Functions - Defined globally
+function openImageGallery() {
+    console.log('openImageGallery() called');
     
+    // Create modal if it doesn't exist
+    if (!document.getElementById('imageGalleryModal')) {
+        console.log('Creating modal...');
+        createImageGalleryModal();
+    }
+    
+    // Show modal
+    const modal = document.getElementById('imageGalleryModal');
+    if (modal) {
+        console.log('Showing modal...');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        // Load gallery images
+        console.log('Loading gallery images...');
+        loadGalleryImages();
+    } else {
+        console.error('Modal not found after creation!');
+    }
+}
+
+function closeImageGallery() {
+    const modal = document.getElementById('imageGalleryModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+}
+
+function createImageGalleryModal() {
+    // Create modal element
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'imageGalleryModal';
+    modalDiv.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 hidden';
+    
+    modalDiv.innerHTML = 
+        '<div class="flex items-center justify-center min-h-screen px-4">' +
+            '<div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">' +
+                '<div class="flex justify-between items-center p-6 border-b">' +
+                    '<h3 class="text-lg font-medium text-gray-900">' +
+                        '<i class="fas fa-images mr-2"></i>Galería de Imágenes' +
+                    '</h3>' +
+                    '<button type="button" onclick="closeImageGallery()" class="text-gray-400 hover:text-gray-600">' +
+                        '<span class="text-2xl">&times;</span>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="p-6 overflow-y-auto max-h-[70vh]">' +
+                    '<div id="galleryImagesGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">' +
+                        '<div class="text-center py-8 col-span-full">' +
+                            '<i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>' +
+                            '<p class="text-gray-500">Cargando imágenes...</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="px-6 py-4 bg-gray-50 border-t flex justify-between items-center">' +
+                    '<p class="text-sm text-gray-600">' +
+                        '<i class="fas fa-info-circle mr-1"></i>' +
+                        'Haz clic en una imagen para seleccionarla' +
+                    '</p>' +
+                    '<button type="button" onclick="closeImageGallery()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">' +
+                        'Cancelar' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    
+    document.body.appendChild(modalDiv);
+}
+
+async function loadGalleryImages() {
+    const grid = document.getElementById('galleryImagesGrid');
+    
+    try {
+        // Fetch images from the media API
+        console.log('Fetching images from API...');
+        const response = await fetch('/api/media?type=images');
+        
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        // The API returns {data: [], current_page: 1, ...}
+        const images = data.data || [];
+        
+        if (images.length === 0) {
+            grid.innerHTML = 
+                '<div class="text-center py-8 col-span-full">' +
+                    '<i class="fas fa-image text-4xl text-gray-300 mb-4"></i>' +
+                    '<p class="text-gray-500 mb-2">No hay imágenes en la galería</p>' +
+                    '<p class="text-sm text-gray-400">Sube algunas imágenes para comenzar</p>' +
+                '</div>';
+            return;
+        }
+        
+        // Create image grid
+        grid.innerHTML = images.map(function(image) {
+            return '<div class="relative group cursor-pointer" onclick="selectImageFromGallery(\'' + 
+                image.url + '\', \'' + 
+                image.name + '\', ' + 
+                image.id + ')">' +
+                '<img src="' + (image.thumb_url || image.url) + '" ' +
+                     'alt="' + image.name + '" ' +
+                     'class="w-full h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors">' +
+                '<div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg flex items-center justify-center">' +
+                    '<div class="bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">' +
+                        '<i class="fas fa-check text-blue-600"></i>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">' +
+                    '<p class="truncate">' + image.name + '</p>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        
+    } catch (error) {
+        console.error('Error loading gallery images:', error);
+        grid.innerHTML = 
+            '<div class="text-center py-8 col-span-full">' +
+                '<i class="fas fa-exclamation-triangle text-4xl text-red-300 mb-4"></i>' +
+                '<p class="text-red-500 mb-2">Error al cargar las imágenes</p>' +
+                '<p class="text-sm text-gray-400">Error: ' + error.message + '</p>' +
+            '</div>';
+    }
+}
+
+function selectImageFromGallery(imageUrl, imageName, imageId) {
+    console.log('Selecting image:', imageUrl, imageName, imageId);
+    
+    // Get the current featured image container
+    const featuredImageContainer = document.querySelector('.bg-white.rounded-lg.shadow.p-6 img');
+    
+    // If there's already a featured image, replace it
+    if (featuredImageContainer) {
+        featuredImageContainer.src = imageUrl;
+    } else {
+        // Create new image display
+        const imageHTML = 
+            '<div class="mb-4">' +
+                '<label class="block text-sm font-medium text-gray-700 mb-2">Imagen Actual</label>' +
+                '<div class="relative group">' +
+                    '<img src="' + imageUrl + '" alt="Imagen destacada" class="w-full h-48 object-cover rounded-lg border border-gray-200">' +
+                    '<div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">' +
+                        '<button type="button" onclick="openImageGallery()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">' +
+                            '<i class="fas fa-images mr-1"></i> Galería' +
+                        '</button>' +
+                        '<button type="button" onclick="document.getElementById(\'featured_image\').click();" class="bg-white hover:bg-gray-100 text-gray-900 px-3 py-1 rounded text-sm border border-gray-200">' +
+                            '<i class="fas fa-upload mr-1"></i> Subir' +
+                        '</button>' +
+                        '<button type="button" onclick="removeFeaturedImage()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">' +
+                            '<i class="fas fa-trash mr-1"></i> Eliminar' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        
+        const uploadSection = document.querySelector('label[for="featured_image"]').parentElement;
+        uploadSection.insertAdjacentHTML('beforebegin', imageHTML);
+    }
+    
+    // Add hidden input with selected media ID
+    const existingInput = document.querySelector('input[name="selected_media_id"]');
+    if (existingInput) {
+        existingInput.value = imageId;
+    } else {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'selected_media_id';
+        hiddenInput.value = imageId;
+        document.querySelector('form').appendChild(hiddenInput);
+    }
+    
+    // Clear file input
+    document.getElementById('featured_image').value = '';
+    
+    // Close modal
+    closeImageGallery();
+    
+    alert('Imagen seleccionada: ' + imageName);
+}
+
+// Featured Image Functions - Defined globally
+function previewFeaturedImage(input) {
+    const preview = document.getElementById('featured_image_preview');
+    const previewImg = document.getElementById('featured_image_preview_img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function clearFeaturedImagePreview() {
+    const preview = document.getElementById('featured_image_preview');
+    const previewImg = document.getElementById('featured_image_preview_img');
+    const fileInput = document.getElementById('featured_image');
+    
+    if (preview) preview.classList.add('hidden');
+    if (previewImg) previewImg.src = '';
+    if (fileInput) fileInput.value = '';
+}
+
+function removeFeaturedImage() {
+    // Clear the file input
+    const fileInput = document.getElementById('featured_image');
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    
+    // Clear any selected media ID
+    const selectedMediaInput = document.querySelector('input[name="selected_media_id"]');
+    if (selectedMediaInput) {
+        selectedMediaInput.remove();
+    }
+    
+    // Hide preview
+    clearFeaturedImagePreview();
+    
+    // Remove current image display if exists
+    const currentImageDiv = document.querySelector('.bg-white.rounded-lg.shadow.p-6 .mb-4');
+    if (currentImageDiv) {
+        currentImageDiv.remove();
+    }
+    
+    alert('Imagen eliminada correctamente');
+}
+
+// Gallery image preview function
+function previewGalleryImages(input) {
+    const container = document.getElementById('gallery_images_preview');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (input.files) {
+        Array.from(input.files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'relative group';
+                    imgContainer.innerHTML = 
+                        '<img src="' + e.target.result + '" alt="Vista previa ' + (index + 1) + '" class="w-full h-32 object-cover rounded border">' +
+                        '<button type="button" onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity">' +
+                            '<span>&times;</span>' +
+                        '</button>';
+                    container.appendChild(imgContainer);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-resize textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+
+    // Character counter for excerpt
+    const excerpt = document.getElementById('excerpt');
+    const excerptCounter = document.createElement('div');
+    excerptCounter.className = 'text-xs text-gray-500 mt-1 text-right';
+    excerpt.parentNode.appendChild(excerptCounter);
+
+        function updateExcerptCounter() {
+            const length = excerpt.value.length;
+            excerptCounter.textContent = length + '/500 caracteres';
+            excerptCounter.className = length > 500 ? 'text-xs text-red-500 mt-1 text-right' : 'text-xs text-gray-500 mt-1 text-right';
+        }    excerpt.addEventListener('input', updateExcerptCounter);
+    updateExcerptCounter();
+
+    // Character counter for meta description
+    const metaDesc = document.getElementById('meta_description');
+    if (metaDesc) {
+        const metaDescCounter = document.createElement('div');
+        metaDescCounter.className = 'text-xs text-gray-500 mt-1 text-right';
+        metaDesc.parentNode.appendChild(metaDescCounter);
+
+        function updateMetaDescCounter() {
+            const length = metaDesc.value.length;
+            metaDescCounter.textContent = length + '/160 caracteres';
+            metaDescCounter.className = length > 160 ? 'text-xs text-red-500 mt-1 text-right' : 'text-xs text-gray-500 mt-1 text-right';
+        }
+
+        metaDesc.addEventListener('input', updateMetaDescCounter);
+        updateMetaDescCounter();
+    }
+});
+
+// Featured Image Functions
+function previewFeaturedImage(input) {
+    const preview = document.getElementById('featured_image_preview');
+    const previewImg = document.getElementById('featured_image_preview_img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function clearFeaturedImagePreview() {
+    const input = document.getElementById('featured_image');
+    const preview = document.getElementById('featured_image_preview');
+    
+    input.value = '';
+    preview.classList.add('hidden');
+}
+
+function removeFeaturedImage() {
+    if (confirm('¿Estás seguro de que quieres eliminar la imagen destacada?')) {
+        // Add a hidden input to mark for deletion
+        const form = document.querySelector('form');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'remove_featured_image';
+        hiddenInput.value = '1';
+        form.appendChild(hiddenInput);
+        
+        // Hide the current image
+        const currentImageContainer = event.target.closest('.relative.group').parentElement;
+        currentImageContainer.style.display = 'none';
+    }
+}
+
+// Gallery Images Functions
+function previewGalleryImages(input) {
+    const preview = document.getElementById('gallery_preview');
+    const container = document.getElementById('gallery_preview_container');
+    
+    // Clear previous previews
+    container.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+        preview.classList.remove('hidden');
+        
+        Array.from(input.files).forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'relative';
+                
+                imgContainer.innerHTML = `
+                    <img src="${e.target.result}" alt="Vista previa ${index + 1}" 
+                         class="w-full h-20 object-cover rounded border border-gray-200">
+                    <button type="button" onclick="removeGalleryPreview(this, ${index})" 
+                            class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+                
+                container.appendChild(imgContainer);
+            }
+            
+            reader.readAsDataURL(file);
+        });
+    } else {
+        preview.classList.add('hidden');
+    }
+}
+
+function removeGalleryPreview(button, index) {
+    const input = document.getElementById('gallery_images');
+    const container = document.getElementById('gallery_preview_container');
+    const preview = document.getElementById('gallery_preview');
+    
+    // Remove the preview element
+    button.parentElement.remove();
+    
+    // Create new FileList without the removed file
+    const dt = new DataTransfer();
+    const files = Array.from(input.files);
+    
+    files.forEach((file, i) => {
+        if (i !== index) {
+            dt.items.add(file);
+        }
+    });
+    
+    input.files = dt.files;
+    
+    // Hide preview if no files left
+    if (input.files.length === 0) {
+        preview.classList.add('hidden');
+    }
+}
+
+function removeGalleryImage(mediaId) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
+        // Add hidden input to mark for deletion
+        const form = document.querySelector('form');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'remove_gallery_images[]';
+        hiddenInput.value = mediaId;
+        form.appendChild(hiddenInput);
+        
+        // Hide the image
+        event.target.closest('.relative.group').style.display = 'none';
+    }
+}
+
+// Drag and Drop functionality
+function setupDragAndDrop() {
+    const dropZones = document.querySelectorAll('[onclick*="click()"]');
+    
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('border-blue-500', 'bg-blue-50');
+        });
+        
+        zone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-blue-500', 'bg-blue-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const input = this.parentElement.querySelector('input[type="file"]');
+                input.files = files;
+                
+                // Trigger change event
+                const event = new Event('change', { bubbles: true });
+                input.dispatchEvent(event);
+            }
+        });
+    });
+}
+
+// Initialize drag and drop when page loads
+document.addEventListener('DOMContentLoaded', setupDragAndDrop);
+
+// Image Gallery Modal Functions
+function openImageGallery() {
+    console.log('openImageGallery() called');
+    
+    // Create modal if it doesn't exist
+    if (!document.getElementById('imageGalleryModal')) {
+        console.log('Creating modal...');
+        createImageGalleryModal();
+    }
+    
+    // Show modal
+    const modal = document.getElementById('imageGalleryModal');
+    if (modal) {
+        console.log('Showing modal...');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        // Load gallery images
+        console.log('Loading gallery images...');
+        loadGalleryImages();
+    } else {
+        console.error('Modal not found after creation!');
+    }
+}
+
+function closeImageGallery() {
+    const modal = document.getElementById('imageGalleryModal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
+
+function createImageGalleryModal() {
+    // Create modal element
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'imageGalleryModal';
+    modalDiv.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 hidden';
+    
+    modalDiv.innerHTML = 
+        '<div class="flex items-center justify-center min-h-screen px-4">' +
+            '<div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">' +
+                '<div class="flex justify-between items-center p-6 border-b">' +
+                    '<h3 class="text-lg font-medium text-gray-900">' +
+                        '<i class="fas fa-images mr-2"></i>Galería de Imágenes' +
+                    '</h3>' +
+                    '<button type="button" onclick="closeImageGallery()" class="text-gray-400 hover:text-gray-600">' +
+                        '<span class="text-2xl">&times;</span>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="p-6 overflow-y-auto max-h-[70vh]">' +
+                    '<div id="galleryImagesGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">' +
+                        '<div class="text-center py-8 col-span-full">' +
+                            '<i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>' +
+                            '<p class="text-gray-500">Cargando imágenes...</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="px-6 py-4 bg-gray-50 border-t flex justify-between items-center">' +
+                    '<p class="text-sm text-gray-600">' +
+                        '<i class="fas fa-info-circle mr-1"></i>' +
+                        'Haz clic en una imagen para seleccionarla' +
+                    '</p>' +
+                    '<button type="button" onclick="closeImageGallery()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">' +
+                        'Cancelar' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    
+    document.body.appendChild(modalDiv);
+    
+    // Close modal when clicking outside
+    document.getElementById('imageGalleryModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeImageGallery();
+        }
+    });
+}
+
+async function loadGalleryImages() {
+    const grid = document.getElementById('galleryImagesGrid');
+    
+    try {
+        // Fetch images from the media API
+        console.log('Fetching images from API...');
+        const response = await fetch('/api/media?type=images');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        // The API returns {data: [], current_page: 1, ...}
+        const images = data.data || [];
+        
+        if (images.length === 0) {
+            grid.innerHTML = `
+                <div class="text-center py-8 col-span-full">
+                    <i class="fas fa-image text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 mb-2">No hay imágenes en la galería</p>
+                    <p class="text-sm text-gray-400">Sube algunas imágenes para comenzar</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Create image grid
+        grid.innerHTML = images.map(image => `
+            <div class="relative group cursor-pointer" onclick="selectImageFromGallery('${image.url}', '${image.name}', ${image.id})">
+                <img src="${image.thumb_url || image.url}" 
+                     alt="${image.name}" 
+                     class="w-full h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg flex items-center justify-center">
+                    <div class="bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i class="fas fa-check text-blue-600"></i>
+                    </div>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p class="truncate">${image.name}</p>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading gallery images:', error);
+        grid.innerHTML = `
+            <div class="text-center py-8 col-span-full">
+                <i class="fas fa-exclamation-triangle text-4xl text-red-300 mb-4"></i>
+                <p class="text-red-500 mb-2">Error al cargar las imágenes</p>
+                <p class="text-sm text-gray-400">Por favor, recarga la página e intenta de nuevo</p>
+            </div>
+        `;
+    }
+}
+
+function selectImageFromGallery(imageUrl, imageName, imageId) {
+    // Get the current featured image container
+    const featuredImageContainer = document.querySelector('.bg-white.rounded-lg.shadow.p-6 img');
+    const currentImageDiv = document.querySelector('.bg-white.rounded-lg.shadow.p-6 .relative.group');
+    
+    // If there's already a featured image, replace it
+    if (featuredImageContainer) {
+        featuredImageContainer.src = imageUrl;
+    } else {
+        // Create new image display
+        const imageHTML = \`
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Imagen Actual</label>
+                <div class="relative group">
+                    <img src="\${imageUrl}" 
+                         alt="Imagen destacada" 
+                         class="w-full h-48 object-cover rounded-lg border border-gray-200">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
+                        <button type="button" onclick="openImageGallery()" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                            <i class="fas fa-images mr-1"></i> Galería
+                        </button>
+                        <button type="button" onclick="document.getElementById('featured_image').click();" 
+                                class="bg-white hover:bg-gray-100 text-gray-900 px-3 py-1 rounded text-sm border border-gray-200">
+                            <i class="fas fa-upload mr-1"></i> Subir
+                        </button>
+                        <button type="button" onclick="removeFeaturedImage()" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                            <i class="fas fa-trash mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        \`;
+        
+        const uploadSection = document.querySelector('label[for="featured_image"]').parentElement;
+        uploadSection.insertAdjacentHTML('beforebegin', imageHTML);
+    }
+    
+    // Add hidden input with selected media ID
+    const existingInput = document.querySelector('input[name="selected_media_id"]');
+    if (existingInput) {
+        existingInput.value = imageId;
+    } else {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'selected_media_id';
+        hiddenInput.value = imageId;
+        document.querySelector('form').appendChild(hiddenInput);
+    }
+    
+    // Clear file input
+    document.getElementById('featured_image').value = '';
+    clearFeaturedImagePreview();
+    
+    // Close modal
+    closeImageGallery();
+    
+    // Show success message
+    showNotification('Imagen seleccionada correctamente', 'success');
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = \`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-0 transition-transform duration-300 \${
+        type === 'success' ? 'bg-green-600 text-white' : 
+        type === 'error' ? 'bg-red-600 text-white' : 
+        'bg-blue-600 text-white'
+    }\`;
+    notification.innerHTML = \`
+        <div class="flex items-center">
+            <i class="fas fa-\${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'} mr-2"></i>
+            <span>\${message}</span>
+        </div>
+    \`;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(full)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Simple global functions for onclick handlers
+window.openImageGallery = function() {
+    console.log('Gallery function called');
+    alert('Función de galería - En desarrollo');
+};
+
+window.previewFeaturedImage = function(input) {
+    console.log('Preview function called');
+    if (input.files && input.files[0]) {
+        const preview = document.getElementById('featured_image_preview');
+        const previewImg = document.getElementById('featured_image_preview_img');
+        
+        if (preview && previewImg) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+};
+
+window.removeFeaturedImage = function() {
+    console.log('Remove function called');
+    const fileInput = document.getElementById('featured_image');
+    const preview = document.getElementById('featured_image_preview');
+    
+    if (fileInput) fileInput.value = '';
+    if (preview) preview.classList.add('hidden');
+    
+    alert('Imagen eliminada');
+};
+</script>
+
+<!-- Include external gallery functions -->
+<script src="{{ asset('js/gallery-functions.js') }}"></script>
+@endsection
